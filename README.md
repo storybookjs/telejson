@@ -4,7 +4,7 @@ A library for teleporting rich data to another place.
 
 ## Install
 
-```
+```sh
 yarn add telejson
 ```
 
@@ -14,6 +14,7 @@ yarn add telejson
 - Date
 - Function
 - Class
+- Symbol
 - etc.
 
 Also JSON doesn't support cyclic data structures.
@@ -22,17 +23,21 @@ This library allows you to pass in data with all all the above properties.
 It will transform the properties to something that's allowed by the JSON spec whilst stringifying,
 and then convert back to the cyclic data structure when parsing.
 
-When parsing, class instances will be given the Class's name again.
+When parsing, **class instances** will be given the Class's name again.
 The prototype isn't copied over.
 
-Function are supported, they are stringified and will be eval-ed when called. 
+**Functions** are supported, they are stringified and will be eval-ed when called. 
 This lazy eval is important for performance.
 The eval happens via [safe-eval](https://www.npmjs.com/package/safe-eval)
 Functions are stripped of comments and whitespace.
 
-Regular expressions just work
+> Obviously calling the function will only really work as expected if the functions were pure the begin with.
 
-Dates are parsed back into actual Date objects.
+**Regular expressions** just work.
+
+**Symbol** will be re-created with the same string. (resulting in a similar, but different symbol)
+
+**Dates** are parsed back into actual Date objects.
 
 ## API
 
