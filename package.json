@@ -36,7 +36,6 @@
     "is-regex": "^1.0.4",
     "is-symbol": "^1.0.2",
     "isobject": "^3.0.1",
-    "jest": "^21.3.0-beta.15",
     "lodash.get": "^4.4.2",
     "safe-eval": "^0.4.1"
   },
@@ -46,6 +45,7 @@
     "@babel/preset-env": "^7.1.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
+    "jest": "^21.3.0-beta.15",
     "regenerator-runtime": "^0.12.1"
   },
   "jest": {
