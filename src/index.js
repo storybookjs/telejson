@@ -6,7 +6,6 @@ import isSymbol from 'is-symbol';
 import isObject from 'isobject';
 
 import get from 'lodash.get';
-import safeEval from 'safe-eval';
 
 const removeCodeComments = code => {
   let inQuoteChar = null;
@@ -202,7 +201,7 @@ export const reviver = function reviver() {
 
       // lazy eval of the function
       const result = (...args) => {
-        const f = safeEval(`(${source})`);
+        const f = eval(`(${source})`);
         f(...args);
       };
       Object.defineProperty(result, 'toString', {
