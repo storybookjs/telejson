@@ -37,6 +37,7 @@
     "is-symbol": "^1.0.2",
     "isobject": "^3.0.1",
     "lodash.get": "^4.4.2",
+    "memoizerific": "^1.11.3",
     "safe-eval": "^0.4.1"
   },
   "devDependencies": {

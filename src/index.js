@@ -4,8 +4,8 @@ import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObject from 'isobject';
-
 import get from 'lodash.get';
+import memoize from 'memoizerific';
 
 const removeCodeComments = code => {
   let inQuoteChar = null;
@@ -14,46 +14,51 @@ const removeCodeComments = code => {
   let inRegexLiteral = false;
   let newCode = '';
 
-  for (let i = 0; i < code.length; i += 1) {
-    if (!inQuoteChar && !inBlockComment && !inLineComment && !inRegexLiteral) {
-      if (code[i] === '"' || code[i] === "'" || code[i] === '`') {
-        inQuoteChar = code[i];
-      } else if (code[i] === '/' && code[i + 1] === '*') {
-        inBlockComment = true;
-      } else if (code[i] === '/' && code[i + 1] === '/') {
-        inLineComment = true;
-      } else if (code[i] === '/' && code[i + 1] !== '/') {
-        inRegexLiteral = true;
+  if (code.indexOf('//') >= 0 || code.indexOf('/*') >= 0) {
+    for (let i = 0; i < code.length; i += 1) {
+      if (!inQuoteChar && !inBlockComment && !inLineComment && !inRegexLiteral) {
+        if (code[i] === '"' || code[i] === "'" || code[i] === '`') {
+          inQuoteChar = code[i];
+        } else if (code[i] === '/' && code[i + 1] === '*') {
+          inBlockComment = true;
+        } else if (code[i] === '/' && code[i + 1] === '/') {
+          inLineComment = true;
+        } else if (code[i] === '/' && code[i + 1] !== '/') {
+          inRegexLiteral = true;
+        }
+      } else {
+        if (
+          inQuoteChar &&
+          ((code[i] === inQuoteChar && code[i - 1] !== '\\') ||
+            (code[i] === '\n' && inQuoteChar !== '`'))
+        ) {
+          inQuoteChar = null;
+        }
+        if (inRegexLiteral && ((code[i] === '/' && code[i - 1] !== '\\') || code[i] === '\n')) {
+          inRegexLiteral = false;
+        }
+        if (inBlockComment && code[i - 1] === '/' && code[i - 2] === '*') {
+          inBlockComment = false;
+        }
+        if (inLineComment && code[i] === '\n') {
+          inLineComment = false;
+        }
       }
-    } else {
-      if (
-        inQuoteChar &&
-        ((code[i] === inQuoteChar && code[i - 1] !== '\\') ||
-          (code[i] === '\n' && inQuoteChar !== '`'))
-      ) {
-        inQuoteChar = null;
-      }
-      if (inRegexLiteral && ((code[i] === '/' && code[i - 1] !== '\\') || code[i] === '\n')) {
-        inRegexLiteral = false;
-      }
-      if (inBlockComment && code[i - 1] === '/' && code[i - 2] === '*') {
-        inBlockComment = false;
-      }
-      if (inLineComment && code[i] === '\n') {
-        inLineComment = false;
+      if (!inBlockComment && !inLineComment) {
+        newCode += code[i];
       }
     }
-    if (!inBlockComment && !inLineComment) {
-      newCode += code[i];
-    }
+  } else {
+    newCode = code;
   }
+
   return newCode;
 };
 
-const cleanCode = code =>
+const cleanCode = memoize(10000)(code =>
   removeCodeComments(code)
     .replace(/\n\s*/g, '') // remove indents & newlines
-    .trim();
+    .trim());
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
@@ -84,10 +89,10 @@ export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
 
     if (isFunction(value)) {
       const { name } = value;
-      const stringified = cleanCode(value.toString());
-
-      if (!stringified.match(/(\[native code\]|WEBPACK_IMPORTED_MODULE)/)) {
-        return `_function_${name}|${stringified}`;
+      const stringified = value.toString();
+      
+      if (!stringified.match(/(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/)) {
+        return `_function_${name}|${cleanCode(stringified)}`;
       }
       return `_function_${name}|${(() => {}).toString()}`;
     }
