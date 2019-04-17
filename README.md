@@ -28,7 +28,7 @@ The prototype isn't copied over.
 
 **Functions** are supported, they are stringified and will be eval-ed when called. 
 This lazy eval is important for performance.
-The eval happens via [safe-eval](https://www.npmjs.com/package/safe-eval)
+The eval happens via `eval()`
 Functions are stripped of comments and whitespace.
 
 > Obviously calling the function will only really work as expected if the functions were pure the begin with.
