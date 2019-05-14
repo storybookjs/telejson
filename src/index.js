@@ -84,10 +84,16 @@ export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
     }
 
     if (isRegExp(value)) {
+      if (!options.allowRegExp) {
+        return undefined;
+      }
       return `_regexp_${value.flags}|${value.source}`;
     }
 
     if (isFunction(value)) {
+      if (!options.allowFunction) {
+        return undefined;
+      }
       const { name } = value;
       const stringified = value.toString();
       
@@ -98,14 +104,23 @@ export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
     }
 
     if (isSymbol(value)) {
+      if (!options.allowSymbol) {
+        return undefined;
+      }
       return `_symbol_${value.toString().slice(7, -1)}`;
     }
 
     if (typeof value === 'string' && dateFormat.test(value)) {
+      if (!options.allowDate) {
+        return undefined;
+      }
       return `_date_${value}`;
     }
 
     if (value === undefined) {
+      if (!options.allowUndefined) {
+        return undefined;
+      }
       return '_undefined_';
     }
 
@@ -143,6 +158,10 @@ export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
         value.constructor.name &&
         value.constructor.name !== 'Object'
       ) {
+        if (!options.allowClass) {
+          return undefined;
+        }
+
         try {
           Object.assign(value, { '_constructor-name_': value.constructor.name });
         } catch (e) {
@@ -258,6 +277,17 @@ export const reviver = function reviver() {
 };
 
 export const isJSON = input => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
+
+const defaultOptions = {
+  maxDepth: 10,
+  space: undefined,
+  allowFunction: true,
+  allowRegExp: true,
+  allowDate: true,
+  allowClass: true,
+  allowUndefined: true,
+  allowSymbol: true,
+}
 
 export const stringify = (data, options = {}) => JSON.stringify(data, replacer(options.maxDepth || 10), options.space);
 export const parse = data => JSON.parse(data, reviver());

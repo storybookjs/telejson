@@ -99,11 +99,23 @@ stringify(date, { maxDepth: 10 });
 `maxDepth`: controls how deep to keep stringifying. When max depth is reach, 
 objects will be replaced with `"[Object]"`, arrays will be replaced with `"[Array(<lenght>)]"`.
 default value is `10`
-This option is really useful if your object is huge/complex, and you don't care deeply nested data,
+This option is really useful if your object is huge/complex, and you don't care about the deeply nested data.
 
 `space`: controls how to prettify the output string.
 default value is `undefined`, no white space is use.
 Only relevant when using `stringify`.
+
+`allowFunction`: When set to false, functions will not be serialized. (default = true)
+
+`allowRegExp`: When set to false, regular expressions will not be serialized. (default = true)
+
+`allowClass`: When set to false, class instances will not be serialized. (default = true)
+
+`allowDate`: When set to false, Date objects will not be serialized. (default = true)
+
+`allowUndefined`: When set to false, `undefined` will not be serialized. (default = true)
+
+`allowSymbol`: When set to false, Symbols will not be serialized. (default = true)
 
 ### reviver
 
