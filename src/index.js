@@ -62,7 +62,7 @@ const cleanCode = memoize(10000)(code =>
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
-export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
+export const replacer = function replacer(options) {
   let objects;
   let stack;
   let keys;
@@ -142,7 +142,7 @@ export const replacer = function replacer(depth = Number.MAX_SAFE_INTEGER) {
       return value;
     }
 
-    if (stack.length >= depth) {
+    if (stack.length >= options.maxDepth) {
       if (Array.isArray(value)) {
         return `[Array(${value.length})]`;
       }
@@ -289,5 +289,8 @@ const defaultOptions = {
   allowSymbol: true,
 }
 
-export const stringify = (data, options = {}) => JSON.stringify(data, replacer(options.maxDepth || 10), options.space);
+export const stringify = (data, options = {}) => {
+  const mergedOptions = Object.assign({}, defaultOptions, options);
+  return JSON.stringify(data, replacer(mergedOptions), options.space);
+};
 export const parse = data => JSON.parse(data, reviver());
