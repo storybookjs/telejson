@@ -97,12 +97,12 @@ stringify(date, { maxDepth: 10 });
 ### replacer
 
 `maxDepth`: controls how deep to keep stringifying. When max depth is reach, 
-objects will be replaced with `"[Object]"`, arrays will be replaced with `"[Array(<lenght>)]"`.
+objects will be replaced with `"[Object]"`, arrays will be replaced with `"[Array(<length>)]"`.
 default value is `10`
 This option is really useful if your object is huge/complex, and you don't care about the deeply nested data.
 
 `space`: controls how to prettify the output string.
-default value is `undefined`, no white space is use.
+default value is `undefined`, no white space is used.
 Only relevant when using `stringify`.
 
 `allowFunction`: When set to false, functions will not be serialized. (default = true)
