@@ -1,6 +1,6 @@
 {
   "name": "telejson",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "",
   "keywords": [
     "JSON",
@@ -28,7 +28,8 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "prepublish": "babel src --out-dir dist"
+    "prepublish": "babel src --out-dir dist",
+    "browserify": "browserify dist/index.js --s telejson > dist/telejson.js"
   },
   "dependencies": {
     "global": "^4.3.2",

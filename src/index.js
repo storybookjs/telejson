@@ -226,7 +226,7 @@ export const reviver = function reviver() {
       // lazy eval of the function
       const result = (...args) => {
         const f = eval(`(${source})`);
-        f(...args);
+        return f(...args);
       };
       Object.defineProperty(result, 'toString', {
         value: () => source,
