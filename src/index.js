@@ -5,6 +5,7 @@ import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObject from 'isobject';
 import get from 'lodash/get';
+import transform from 'lodash/transform';
 import memoize from 'memoizerific';
 
 const removeCodeComments = code => {
@@ -192,13 +193,13 @@ export const reviver = function reviver() {
       root = value;
 
       // restore cyclic refs
-      refs.forEach(({ target, container, replacement }) => {
+      refs.forEach(({ target, replacement }) => {
         if (replacement === 'root') {
           // eslint-disable-next-line no-param-reassign
-          container[target] = root;
+          value[target] = root;
         } else {
           // eslint-disable-next-line no-param-reassign
-          container[target] = get(root, replacement.replace('root.', ''));
+          value[target] = get(root, replacement.replace('root.', ''));
         }
       });
     }
@@ -226,7 +227,7 @@ export const reviver = function reviver() {
       // lazy eval of the function
       const result = (...args) => {
         const f = eval(`(${source})`);
-        f(...args);
+        return f(...args);
       };
       Object.defineProperty(result, 'toString', {
         value: () => source,
@@ -248,7 +249,7 @@ export const reviver = function reviver() {
     }
 
     if (typeof value === 'string' && value.startsWith('_duplicate_')) {
-      refs.push({ target: key, container: this, replacement: value.replace('_duplicate_', '') });
+      refs.push({ target: key, replacement: value.replace('_duplicate_', '') });
       return null;
     }
 
@@ -293,4 +294,29 @@ export const stringify = (data, options = {}) => {
   const mergedOptions = Object.assign({}, defaultOptions, options);
   return JSON.stringify(data, replacer(mergedOptions), options.space);
 };
-export const parse = data => JSON.parse(data, reviver());
+
+function cloneDeep(value, revive) {
+  // we don't want to update object if it has name
+  // we skip transform and return it
+  // Example: if we have {"_constructor-name_":"Foo"} then we want to return `Foo {}`
+  if (isObject(value) && value.constructor.name === 'Object') {
+    return transform(value, (res, val, key) => {
+      const v = revive(key, val)
+
+      res[key] = v !== val ? v : cloneDeep(val, revive)
+    }, {})
+  }
+
+  return value
+}
+
+
+export const parse = data => {
+  const parsed = JSON.parse(data)
+  const revive = reviver()
+  const result = cloneDeep(parsed, revive)
+
+  // we use blank key, because JSON.parse calls object with blank key at the end
+  // and we emulate JSOn.parse work
+  return revive('', result)
+};
