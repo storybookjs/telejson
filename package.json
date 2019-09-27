@@ -28,7 +28,8 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "test": "TZ=UTC jest",
-    "prepublish": "babel src --out-dir dist"
+    "build": "babel src --out-dir dist",
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "global": "^4.3.2",
@@ -41,12 +42,18 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.3",
-    "@babel/preset-env": "^7.3.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^24.1.0",
-    "jest": "^24.1.0",
-    "regenerator-runtime": "^0.13.1"
+    "regenerator-runtime": "^0.13.1",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-typescript": "^7.6.0",
+    "@storybook/eslint-config-storybook": "^1.0.0",
+    "@types/jest": "^24.0.18",
+    "common-tags": "^1.8.0",
+    "eslint": "^5.0.0",
+    "jest": "^24.9.0",
+    "typescript": "^3.6.3"
   },
   "jest": {
     "testEnvironment": "node"
