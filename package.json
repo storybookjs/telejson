@@ -27,7 +27,7 @@
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "TZ=UTC jest",
     "prepublish": "babel src --out-dir dist"
   },
   "dependencies": {
