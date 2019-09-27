@@ -49,7 +49,6 @@ const data = {
   fn3,
   date,
   foo: new Foo,
-  data,
   nested,
 };
 
@@ -116,3 +115,115 @@ test('space', () => {
 test('stringify the global object', () => {
   expect(() => stringify(global, { maxDepth: 10000 })).not.toThrow();
 });
+
+test('check duplicate value', () => {
+  const Fruit = {
+    apple: true,
+    parent: {}
+  };
+  Fruit.parent.cyclic = Fruit;
+  const stringified = stringify(Fruit)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"apple":true,"parent":{"cyclic":"_duplicate_root"}}')
+  expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
+  expect(parsed.cyclic).toBe(parsed);
+  expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
+})
+
+test('check constructor value', () => {
+  const data = { ConstructorFruit: new Foo }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}')
+  expect(parsed.ConstructorFruit).toBeDefined();
+  expect(parsed.ConstructorFruit.constructor.name).toBe('Foo')
+  expect(parsed.foo instanceof Foo).toBe(false);
+})
+
+test('check function value', () => {
+  const Fruit = function(value) {
+    return [value, 'apple']
+  }
+  const data = { FunctionFruit: Fruit }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}')
+  expect(parsed.FunctionFruit('orange')).toEqual(['orange', 'apple']) 
+  expect(parsed.FunctionFruit.toString()).toEqual("function Fruit(value) {return [value, \'apple\'];}")
+})
+
+test('check regExp value', () => {
+  const data = { RegExpFruit: /test/g, }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"RegExpFruit":"_regexp_g|test"}')
+  expect(parsed).toMatchObject(data)
+})
+
+test('check date value', () => {
+  const data = { DateFruit: new Date('01.01.2019') }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"DateFruit":"_date_2019-01-01T00:00:00.000Z"}')
+  expect(parsed).toMatchObject(data)
+  expect(parsed.DateFruit.getFullYear()).toBe(2019)
+})
+
+test('check symbol value', () => {
+  const data = { SymbleFruit: Symbol('apple') }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"SymbleFruit":"_symbol_apple"}')
+  expect(parsed.SymbleFruit.toString()).toEqual('Symbol(apple)')
+})
+
+test('check minus Infinity value', () => {
+  const data = { InfinityFruit: -Infinity }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"InfinityFruit":"_-Infinity_"}')
+  expect(parsed).toMatchObject(data)
+})
+
+test('check Infinity value', () => {
+  const data = { InfinityFruit: Infinity }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"InfinityFruit":"_Infinity_"}')
+  expect(parsed).toMatchObject(data)
+})
+
+test('check NaN value', () => {
+  const data = { NaNFruit: NaN }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"NaNFruit":"_NaN_"}')
+  expect(parsed).toMatchObject(data)
+})
+
+test('check undefined value', () => {
+  const data = { undefinedFruit: undefined }
+
+  const stringified = stringify(data)
+  const parsed = parse(stringified)
+
+  expect(stringified).toEqual('{"undefinedFruit":"_undefined_"}')
+  expect(parsed).toMatchObject(data)
+})
