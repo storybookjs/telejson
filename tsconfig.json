@@ -9,5 +9,7 @@
     "esModuleInterop": true,
     "types": ["jest"],
     "outDir": "dist"
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
 }
