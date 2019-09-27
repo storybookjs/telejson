@@ -59,7 +59,8 @@ const removeCodeComments = code => {
 const cleanCode = memoize(10000)(code =>
   removeCodeComments(code)
     .replace(/\n\s*/g, '') // remove indents & newlines
-    .trim());
+    .trim()
+);
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
@@ -97,8 +98,12 @@ export const replacer = function replacer(options) {
       }
       const { name } = value;
       const stringified = value.toString();
-      
-      if (!stringified.match(/(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/)) {
+
+      if (
+        !stringified.match(
+          /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
+        )
+      ) {
         return `_function_${name}|${cleanCode(stringified)}`;
       }
       return `_function_${name}|${(() => {}).toString()}`;
@@ -226,6 +231,7 @@ export const reviver = function reviver() {
 
       // lazy eval of the function
       const result = (...args) => {
+        // eslint-disable-next-line no-eval
         const f = eval(`(${source})`);
         return f(...args);
       };
@@ -277,6 +283,7 @@ export const reviver = function reviver() {
   };
 };
 
+// eslint-disable-next-line no-useless-escape
 export const isJSON = input => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 const defaultOptions = {
@@ -288,7 +295,7 @@ const defaultOptions = {
   allowClass: true,
   allowUndefined: true,
   allowSymbol: true,
-}
+};
 
 export const stringify = (data, options = {}) => {
   const mergedOptions = Object.assign({}, defaultOptions, options);
@@ -300,23 +307,26 @@ function cloneDeep(value, revive) {
   // we skip transform and return it
   // Example: if we have {"_constructor-name_":"Foo"} then we want to return `Foo {}`
   if (isObject(value) && value.constructor.name === 'Object') {
-    return transform(value, (res, val, key) => {
-      const v = revive(key, val)
+    return transform(
+      value,
+      (res, val, key) => {
+        const v = revive(key, val);
 
-      res[key] = v !== val ? v : cloneDeep(val, revive)
-    }, {})
+        res[key] = v !== val ? v : cloneDeep(val, revive);
+      },
+      {}
+    );
   }
 
-  return value
+  return value;
 }
 
-
 export const parse = data => {
-  const parsed = JSON.parse(data)
-  const revive = reviver()
-  const result = cloneDeep(parsed, revive)
+  const parsed = JSON.parse(data);
+  const revive = reviver();
+  const result = cloneDeep(parsed, revive);
 
   // we use blank key, because JSON.parse calls object with blank key at the end
   // and we emulate JSOn.parse work
-  return revive('', result)
+  return revive('', result);
 };
