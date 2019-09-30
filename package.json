@@ -25,7 +25,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
-    "lint": "eslint src",
+    "lint": "eslint src --ext .js,.ts",
     "prepublish": "yarn build",
     "test": "TZ=UTC jest"
   },
