@@ -157,6 +157,10 @@ export const replacer = function replacer(options: Options) {
       return value;
     }
 
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
     if (stack.length >= options.maxDepth) {
       if (Array.isArray(value)) {
         return `[Array(${value.length})]`;
