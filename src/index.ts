@@ -1,5 +1,3 @@
-import { window, document } from 'global';
-
 import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
@@ -8,7 +6,7 @@ import get from 'lodash/get';
 import transform from 'lodash/transform';
 import memoize from 'memoizerific';
 
-const removeCodeComments = code => {
+const removeCodeComments = (code: string) => {
   let inQuoteChar = null;
   let inBlockComment = false;
   let inLineComment = false;
@@ -64,12 +62,23 @@ const cleanCode = memoize(10000)(code =>
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
-export const replacer = function replacer(options) {
-  let objects;
-  let stack;
-  let keys;
+interface Options {
+  allowRegExp: boolean;
+  allowFunction: boolean;
+  allowSymbol: boolean;
+  allowDate: boolean;
+  allowUndefined: boolean;
+  allowClass: boolean;
+  maxDepth: number;
+  space: number | undefined;
+}
 
-  return function replace(key, value) {
+export const replacer = function replacer(options: Options) {
+  let objects: any[];
+  let stack: any[];
+  let keys: string[];
+
+  return function replace(this: any, key: string, value: any) {
     //  very first iteration
     if (key === '') {
       keys = ['root'];
@@ -189,10 +198,10 @@ export const replacer = function replacer(options) {
 };
 
 export const reviver = function reviver() {
-  const refs = [];
-  let root;
+  const refs: any[] = [];
+  let root: any;
 
-  return function revive(key, value) {
+  return function revive(key: string, value: any) {
     // last iteration = root
     if (key === '') {
       root = value;
@@ -227,10 +236,10 @@ export const reviver = function reviver() {
     }
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
-      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/);
+      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
 
       // lazy eval of the function
-      const result = (...args) => {
+      const result = (...args: any[]) => {
         // eslint-disable-next-line no-eval
         const f = eval(`(${source})`);
         return f(...args);
@@ -246,7 +255,7 @@ export const reviver = function reviver() {
 
     if (typeof value === 'string' && value.startsWith('_regexp_')) {
       // this split isn't working correctly
-      const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/);
+      const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/) || [];
       return new RegExp(source, flags);
     }
 
@@ -284,9 +293,9 @@ export const reviver = function reviver() {
 };
 
 // eslint-disable-next-line no-useless-escape
-export const isJSON = input => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
+export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
-const defaultOptions = {
+const defaultOptions: Options = {
   maxDepth: 10,
   space: undefined,
   allowFunction: true,
@@ -297,19 +306,19 @@ const defaultOptions = {
   allowSymbol: true,
 };
 
-export const stringify = (data, options = {}) => {
-  const mergedOptions = Object.assign({}, defaultOptions, options);
+export const stringify = (data: JSON, options: Partial<Options> = {}) => {
+  const mergedOptions: Options = Object.assign({}, defaultOptions, options);
   return JSON.stringify(data, replacer(mergedOptions), options.space);
 };
 
-function cloneDeep(value, revive) {
+function cloneDeep(value: any, revive: ReturnType<typeof reviver>) {
   // we don't want to update object if it has name
   // we skip transform and return it
   // Example: if we have {"_constructor-name_":"Foo"} then we want to return `Foo {}`
   if (isObject(value) && value.constructor.name === 'Object') {
     return transform(
       value,
-      (res, val, key) => {
+      (res: any, val, key: string) => {
         const v = revive(key, val);
 
         res[key] = v !== val ? v : cloneDeep(val, revive);
@@ -321,7 +330,7 @@ function cloneDeep(value, revive) {
   return value;
 }
 
-export const parse = data => {
+export const parse = (data: string) => {
   const parsed = JSON.parse(data);
   const revive = reviver();
   const result = cloneDeep(parsed, revive);

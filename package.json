@@ -4,18 +4,15 @@
   "description": "",
   "keywords": [
     "JSON",
-    "parse",
-    "stringify",
     "cyclic",
     "cyclical",
-    "function",
     "date",
-    "regex"
+    "function",
+    "parse",
+    "regex",
+    "stringify"
   ],
   "homepage": "https://github.com/storybooks/telejson",
-  "publishConfig": {
-    "access": "public"
-  },
   "bugs": {
     "url": "https://github.com/storybooks/telejson/issues"
   },
@@ -25,44 +22,49 @@
   },
   "license": "MIT",
   "main": "dist/index.js",
-  "jsnext:main": "src/index.js",
+  "types": "src/index.d.ts",
   "scripts": {
-    "test": "TZ=UTC jest",
-    "build": "babel src --out-dir dist",
-    "lint": "eslint src",
-    "prepublish": "yarn build"
-  },
-  "dependencies": {
-    "global": "^4.3.2",
-    "is-function": "^1.0.1",
-    "is-regex": "^1.0.4",
-    "is-symbol": "^1.0.2",
-    "isobject": "^3.0.1",
-    "lodash": "^4.17.11",
-    "memoizerific": "^1.11.3"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@babel/preset-typescript": "^7.6.0",
-    "@storybook/eslint-config-storybook": "^1.0.0",
-    "@types/jest": "^24.0.18",
-    "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^24.1.0",
-    "common-tags": "^1.8.0",
-    "eslint": "^5.0.0",
-    "prettier": "^1.18.2",
-    "jest": "^24.9.0",
-    "regenerator-runtime": "^0.13.1",
-    "typescript": "^3.6.3"
-  },
-  "jest": {
-    "testEnvironment": "node"
+    "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
+    "lint": "eslint src --ext .js,.ts",
+    "prepublish": "yarn build",
+    "test": "TZ=UTC jest"
   },
   "eslintConfig": {
     "extends": [
       "@storybook/eslint-config-storybook"
     ]
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "@types/is-function": "^1.0.0",
+    "global": "^4.4.0",
+    "is-function": "^1.0.1",
+    "is-regex": "^1.0.4",
+    "is-symbol": "^1.0.2",
+    "isobject": "^4.0.0",
+    "lodash": "^4.17.15",
+    "memoizerific": "^1.11.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-typescript": "^7.6.0",
+    "@storybook/eslint-config-storybook": "^1.0.0",
+    "@types/jest": "^24.0.18",
+    "@types/lodash": "^4.14.141",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^24.9.0",
+    "common-tags": "^1.8.0",
+    "eslint": "^5.0.0",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "regenerator-runtime": "^0.13.3",
+    "typescript": "^3.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
