@@ -24,8 +24,7 @@
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "build": "babel src --out-dir dist",
-    "build-ts": "tsc",
+    "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
     "lint": "eslint src",
     "prepublish": "yarn build",
     "test": "TZ=UTC jest"

@@ -74,11 +74,11 @@ interface Options {
 }
 
 export const replacer = function replacer(options: Options) {
-  let objects;
-  let stack;
+  let objects: any[];
+  let stack: any[];
   let keys: string[];
 
-  return function replace(key: string, value: any) {
+  return function replace(this: any, key: string, value: any) {
     //  very first iteration
     if (key === '') {
       keys = ['root'];
@@ -198,8 +198,8 @@ export const replacer = function replacer(options: Options) {
 };
 
 export const reviver = function reviver() {
-  const refs = [];
-  let root;
+  const refs: any[] = [];
+  let root: any;
 
   return function revive(key: string, value: any) {
     // last iteration = root
@@ -236,10 +236,10 @@ export const reviver = function reviver() {
     }
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
-      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/);
+      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
 
       // lazy eval of the function
-      const result = (...args) => {
+      const result = (...args: any[]) => {
         // eslint-disable-next-line no-eval
         const f = eval(`(${source})`);
         return f(...args);
@@ -255,7 +255,7 @@ export const reviver = function reviver() {
 
     if (typeof value === 'string' && value.startsWith('_regexp_')) {
       // this split isn't working correctly
-      const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/);
+      const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/) || [];
       return new RegExp(source, flags);
     }
 
@@ -318,7 +318,7 @@ function cloneDeep(value: any, revive: ReturnType<typeof reviver>) {
   if (isObject(value) && value.constructor.name === 'Object') {
     return transform(
       value,
-      (res, val, key) => {
+      (res: any, val, key: string) => {
         const v = revive(key, val);
 
         res[key] = v !== val ? v : cloneDeep(val, revive);
@@ -330,7 +330,7 @@ function cloneDeep(value: any, revive: ReturnType<typeof reviver>) {
   return value;
 }
 
-export const parse = data => {
+export const parse = (data: string) => {
   const parsed = JSON.parse(data);
   const revive = reviver();
   const result = cloneDeep(parsed, revive);
