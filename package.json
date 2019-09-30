@@ -22,7 +22,7 @@
   },
   "license": "MIT",
   "main": "dist/index.js",
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
     "lint": "eslint src --ext .js,.ts",
