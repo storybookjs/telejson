@@ -22,7 +22,7 @@
   },
   "license": "MIT",
   "main": "dist/index.js",
-  "jsnext:main": "src/index.js",
+  "types": "src/index.d.ts",
   "scripts": {
     "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
     "lint": "eslint src",
