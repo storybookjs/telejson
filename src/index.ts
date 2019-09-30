@@ -310,7 +310,7 @@ const defaultOptions: Options = {
   allowSymbol: true,
 };
 
-export const stringify = (data: JSON, options: Partial<Options> = {}) => {
+export const stringify = (data: any, options: Partial<Options> = {}) => {
   const mergedOptions: Options = Object.assign({}, defaultOptions, options);
   return JSON.stringify(data, replacer(mergedOptions), options.space);
 };
