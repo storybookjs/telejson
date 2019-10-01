@@ -123,11 +123,11 @@ test('check duplicate value', () => {
     apple: true,
     parent: {},
   };
-  Fruit.parent.cyclic = Fruit;
+  Fruit.cyclic = Fruit;
   const stringified = stringify(Fruit);
   const parsed = parse(stringified);
 
-  expect(stringified).toEqual('{"apple":true,"parent":{"cyclic":"_duplicate_root"}}');
+  expect(stringified).toEqual('{"apple":true,"parent":{},"cyclic":"_duplicate_root"}');
   expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
   expect(parsed.cyclic).toBe(parsed);
   expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
@@ -231,10 +231,11 @@ test('check undefined value', () => {
   const parsed = parse(stringified);
 
   expect(stringified).toEqual('{"undefinedFruit":"_undefined_"}');
-  expect(parsed).toMatchObject(data);
+  expect(parsed.undefinedFruit).toEqual(undefined);
+  expect(Object.keys(parsed)).toEqual(['undefinedFruit']);
 });
 
-test('primitives should non be deduplicated', () => {
+test('primitives should not be deduplicated', () => {
   const data = {
     bool: true,
     a: 1,
@@ -260,4 +261,30 @@ test('primitives should non be deduplicated', () => {
     '{"bool":true,"a":1,"b":"1","c":{"bool":true,"c":1,"d":3,"e":"3","f":{"bool":true,"c":"1","d":3,"e":"3"}}}'
   );
   expect(parsed).toMatchObject(data);
+});
+
+test('bug', () => {
+  const data = {
+    a: 1,
+    b: '2',
+    c: NaN,
+    d: true,
+    e: {
+      1: data,
+    },
+    f: [1,2,3,4,5],
+    g: undefined,
+    h: null,
+    i: () => {},
+    j: function(){}
+  };
+
+  const stringified = stringify(data);
+  expect(stringified).toMatch("{\"a\":1,\"b\":\"2\",\"c\":\"_NaN_\",\"d\":true,\"e\":{\"1\":\"_undefined_\"},\"f\":[1,2,3,4,5],\"g\":\"_undefined_\",\"h\":null,\"i\":\"_function_i|function i() {}\",\"j\":\"_function_j|function j() {}\"}")
+
+  const parsed = parse(stringified);
+
+  Object.entries(parsed).forEach((k, v) => {
+    expect(data[k]).toEqual(parsed[k]);
+  })
 });

@@ -205,19 +205,19 @@ export const reviver = function reviver() {
   const refs: any[] = [];
   let root: any;
 
-  return function revive(key: string, value: any) {
+  return function revive(this: any, key: string, value: any) {
     // last iteration = root
     if (key === '') {
       root = value;
 
       // restore cyclic refs
-      refs.forEach(({ target, replacement }) => {
+      refs.forEach(({ target, container, replacement }) => {
         if (replacement === 'root') {
           // eslint-disable-next-line no-param-reassign
-          value[target] = root;
+          container[target] = root;
         } else {
           // eslint-disable-next-line no-param-reassign
-          value[target] = get(root, replacement.replace('root.', ''));
+          container[target] = get(root, replacement.replace('root.', ''));
         }
       });
     }
@@ -268,16 +268,12 @@ export const reviver = function reviver() {
     }
 
     if (typeof value === 'string' && value.startsWith('_duplicate_')) {
-      refs.push({ target: key, replacement: value.replace('_duplicate_', '') });
+      refs.push({ target: key, container: this, replacement: value.replace('_duplicate_', '') });
       return null;
     }
 
     if (typeof value === 'string' && value.startsWith('_symbol_')) {
       return Symbol(value.replace('_symbol_', ''));
-    }
-
-    if (typeof value === 'string' && value === '_undefined_') {
-      return undefined;
     }
 
     if (typeof value === 'string' && value === '_-Infinity_') {
@@ -315,31 +311,35 @@ export const stringify = (data: any, options: Partial<Options> = {}) => {
   return JSON.stringify(data, replacer(mergedOptions), options.space);
 };
 
-function cloneDeep(value: any, revive: ReturnType<typeof reviver>) {
-  // we don't want to update object if it has name
-  // we skip transform and return it
-  // Example: if we have {"_constructor-name_":"Foo"} then we want to return `Foo {}`
-  if (isObject(value) && value.constructor.name === 'Object') {
-    return transform(
-      value,
-      (res: any, val, key: string) => {
-        const v = revive(key, val);
+const mutator = () => {
+  const mutated: any[] = [];
+  return function mutateUndefined(value: any) {
+    // JSON.parse will not output keys with value of undefined
+    // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
+    if (isObject(value)) {
+      Object.entries(value).forEach(([k, v]) => {
+        if (v === '_undefined_') {
+          // eslint-disable-next-line no-param-reassign
+          value[k] = undefined;
+        } else if (!mutated.includes(v)) {
+          mutated.push(v);
+          mutateUndefined(v);
+        }
+      });
+    }
+    if (Array.isArray(value)) {
+      value.forEach(v => {
+        mutated.push(v);
+        mutateUndefined(v);
+      });
+    }
+  };
+};
 
-        res[key] = v !== val ? v : cloneDeep(val, revive);
-      },
-      {}
-    );
-  }
+export const parse = (data: any) => {
+  const result = JSON.parse(data, reviver());
 
-  return value;
-}
+  mutator()(result);
 
-export const parse = (data: string) => {
-  const parsed = JSON.parse(data);
-  const revive = reviver();
-  const result = cloneDeep(parsed, revive);
-
-  // we use blank key, because JSON.parse calls object with blank key at the end
-  // and we emulate JSOn.parse work
-  return revive('', result);
+  return result;
 };
