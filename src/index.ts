@@ -76,7 +76,7 @@ interface Options {
 }
 
 export const replacer = function replacer(options: Options) {
-  let objects: { keys: string, value: any }[];
+  let objects: { keys: string; value: any }[];
   let stack: any[];
   let keys: string[];
 
@@ -203,11 +203,15 @@ export const replacer = function replacer(options: Options) {
   };
 };
 
+interface ValueContainer {
+  '_constructor-name_': string;
+  [keys: string]: any;
+}
+
 export const reviver = function reviver() {
-  const refs: { target: string, container: { [keys: string]: any }, replacement: string }[] = [];
+  const refs: { target: string; container: { [keys: string]: any }; replacement: string }[] = [];
   let root: any;
 
-  type ValueContainer = { '_constructor-name_': string, [keys: string]: any };
   return function revive(this: any, key: string, value: ValueContainer | string) {
     // last iteration = root
     if (key === '') {
