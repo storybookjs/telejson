@@ -1,10 +1,12 @@
 import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
-import isObject from 'isobject';
+import isObjectAny from 'isobject';
 import get from 'lodash/get';
 import transform from 'lodash/transform';
 import memoize from 'memoizerific';
+
+const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
 const removeCodeComments = (code: string) => {
   let inQuoteChar = null;
@@ -74,7 +76,7 @@ interface Options {
 }
 
 export const replacer = function replacer(options: Options) {
-  let objects: any[];
+  let objects: { keys: string; value: any }[];
   let stack: any[];
   let keys: string[];
 
@@ -201,11 +203,16 @@ export const replacer = function replacer(options: Options) {
   };
 };
 
+interface ValueContainer {
+  '_constructor-name_': string;
+  [keys: string]: any;
+}
+
 export const reviver = function reviver() {
-  const refs: any[] = [];
+  const refs: { target: string; container: { [keys: string]: any }; replacement: string }[] = [];
   let root: any;
 
-  return function revive(this: any, key: string, value: any) {
+  return function revive(this: any, key: string, value: ValueContainer | string) {
     // last iteration = root
     if (key === '') {
       root = value;
@@ -227,7 +234,7 @@ export const reviver = function reviver() {
     }
 
     // deal with instance names
-    if (isObject(value) && value['_constructor-name_']) {
+    if (isObject<ValueContainer>(value) && value['_constructor-name_']) {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
         // eslint-disable-next-line no-new-func
@@ -316,7 +323,7 @@ const mutator = () => {
   return function mutateUndefined(value: any) {
     // JSON.parse will not output keys with value of undefined
     // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
-    if (isObject(value)) {
+    if (isObject<{ [keys: string]: any }>(value)) {
       Object.entries(value).forEach(([k, v]) => {
         if (v === '_undefined_') {
           // eslint-disable-next-line no-param-reassign
@@ -336,7 +343,7 @@ const mutator = () => {
   };
 };
 
-export const parse = (data: any) => {
+export const parse = (data: string) => {
   const result = JSON.parse(data, reviver());
 
   mutator()(result);
