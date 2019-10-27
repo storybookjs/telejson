@@ -251,6 +251,7 @@ export const reviver = function reviver(options: Options) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
 
       if (!options.lazyEval) {
+        // eslint-disable-next-line no-eval
         return eval(`(${source})`);
       }
 
