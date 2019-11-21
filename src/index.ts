@@ -62,6 +62,27 @@ const cleanCode = memoize(10000)(code =>
     .trim()
 );
 
+const convertShorthandMethods = function(key: string, stringified: string) {
+  const fnHead = stringified.slice(0, stringified.indexOf('{'));
+  const fnBody = stringified.slice(stringified.indexOf('{'));
+
+  if (fnHead.includes('=>')) {
+    // This is an arrow function
+    return stringified;
+  }
+
+  if (fnHead.includes('function')) {
+    // This is an anonymous function
+    return stringified;
+  }
+
+  let modifiedHead = fnHead;
+
+  modifiedHead = modifiedHead.replace(key, 'function');
+
+  return modifiedHead + fnBody;
+};
+
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
 interface Options {
@@ -116,7 +137,7 @@ export const replacer = function replacer(options: Options) {
           /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
         )
       ) {
-        return `_function_${name}|${cleanCode(stringified)}`;
+        return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
       }
       return `_function_${name}|${(() => {}).toString()}`;
     }
