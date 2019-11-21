@@ -62,6 +62,27 @@ const cleanCode = memoize(10000)(code =>
     .trim()
 );
 
+const convertShorthandMethods = function(key: string, stringified: string) {
+  const fnHead = stringified.slice(0, stringified.indexOf('{'));
+  const fnBody = stringified.slice(stringified.indexOf('{'));
+
+  if (fnHead.includes('=>')) {
+    // This is an arrow function
+    return stringified;
+  }
+
+  if (fnHead.includes('function')) {
+    // This is an anonymous function
+    return stringified;
+  }
+
+  let modifiedHead = fnHead;
+
+  modifiedHead = modifiedHead.replace(key, 'function');
+
+  return modifiedHead + fnBody;
+};
+
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
 interface Options {
@@ -73,6 +94,7 @@ interface Options {
   allowClass: boolean;
   maxDepth: number;
   space: number | undefined;
+  lazyEval: boolean;
 }
 
 export const replacer = function replacer(options: Options) {
@@ -115,7 +137,7 @@ export const replacer = function replacer(options: Options) {
           /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
         )
       ) {
-        return `_function_${name}|${cleanCode(stringified)}`;
+        return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
       }
       return `_function_${name}|${(() => {}).toString()}`;
     }
@@ -208,7 +230,7 @@ interface ValueContainer {
   [keys: string]: any;
 }
 
-export const reviver = function reviver() {
+export const reviver = function reviver(options: Options) {
   const refs: { target: string; container: { [keys: string]: any }; replacement: string }[] = [];
   let root: any;
 
@@ -248,6 +270,11 @@ export const reviver = function reviver() {
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
+
+      if (!options.lazyEval) {
+        // eslint-disable-next-line no-eval
+        return eval(`(${source})`);
+      }
 
       // lazy eval of the function
       const result = (...args: any[]) => {
@@ -311,6 +338,7 @@ const defaultOptions: Options = {
   allowClass: true,
   allowUndefined: true,
   allowSymbol: true,
+  lazyEval: true,
 };
 
 export const stringify = (data: any, options: Partial<Options> = {}) => {
@@ -343,8 +371,9 @@ const mutator = () => {
   };
 };
 
-export const parse = (data: string) => {
-  const result = JSON.parse(data, reviver());
+export const parse = (data: string, options: Partial<Options> = {}) => {
+  const mergedOptions: Options = Object.assign({}, defaultOptions, options);
+  const result = JSON.parse(data, reviver(mergedOptions));
 
   mutator()(result);
 
