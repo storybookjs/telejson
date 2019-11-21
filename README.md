@@ -119,7 +119,9 @@ Only relevant when using `stringify`.
 
 ### reviver
 
-Doesn't take any options right now.
+`lazyEval`: When set to false, lazy eval will be disabled. (default true)
+
+Note: disabling lazy eval will affect performance. Consider disabling it only if you truly need to.
 
 ## Contributing
 
