@@ -314,7 +314,7 @@ const defaultOptions: Options = {
 };
 
 export const stringify = (data: any, options: Partial<Options> = {}) => {
-  const mergedOptions: Options = Object.assign({}, defaultOptions, options);
+  const mergedOptions: Options = { ...defaultOptions, ...options };
   return JSON.stringify(data, replacer(mergedOptions), options.space);
 };
 
