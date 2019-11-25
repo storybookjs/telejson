@@ -103,125 +103,129 @@ export const replacer = function replacer(options: Options) {
   let keys: string[];
 
   return function replace(this: any, key: string, value: any) {
-    //  very first iteration
-    if (key === '') {
-      keys = ['root'];
-      objects = [{ keys: 'root', value }];
-      stack = [];
-      return value;
-    }
-
-    // From the JSON.stringify's doc:
-    // "The object in which the key was found is provided as the replacer's this parameter." thus one can control the depth
-    while (stack.length && this !== stack[0]) {
-      stack.shift();
-      keys.pop();
-    }
-
-    if (isRegExp(value)) {
-      if (!options.allowRegExp) {
-        return undefined;
-      }
-      return `_regexp_${value.flags}|${value.source}`;
-    }
-
-    if (isFunction(value)) {
-      if (!options.allowFunction) {
-        return undefined;
-      }
-      const { name } = value;
-      const stringified = value.toString();
-
-      if (
-        !stringified.match(
-          /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
-        )
-      ) {
-        return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
-      }
-      return `_function_${name}|${(() => {}).toString()}`;
-    }
-
-    if (isSymbol(value)) {
-      if (!options.allowSymbol) {
-        return undefined;
-      }
-      return `_symbol_${value.toString().slice(7, -1)}`;
-    }
-
-    if (typeof value === 'string' && dateFormat.test(value)) {
-      if (!options.allowDate) {
-        return undefined;
-      }
-      return `_date_${value}`;
-    }
-
-    if (value === undefined) {
-      if (!options.allowUndefined) {
-        return undefined;
-      }
-      return '_undefined_';
-    }
-
-    if (typeof value === 'number') {
-      if (value === -Infinity) {
-        return '_-Infinity_';
-      }
-      if (value === Infinity) {
-        return '_Infinity_';
-      }
-      if (Number.isNaN(value)) {
-        return '_NaN_';
+    try {
+      //  very first iteration
+      if (key === '') {
+        keys = ['root'];
+        objects = [{ keys: 'root', value }];
+        stack = [];
+        return value;
       }
 
-      return value;
-    }
-
-    if (typeof value === 'string') {
-      return value;
-    }
-
-    if (typeof value === 'boolean') {
-      return value;
-    }
-
-    if (stack.length >= options.maxDepth) {
-      if (Array.isArray(value)) {
-        return `[Array(${value.length})]`;
+      // From the JSON.stringify's doc:
+      // "The object in which the key was found is provided as the replacer's this parameter." thus one can control the depth
+      while (stack.length && this !== stack[0]) {
+        stack.shift();
+        keys.pop();
       }
-      return '[Object]';
-    }
 
-    const found = objects.find(o => o.value === value);
-    if (!found) {
-      if (
-        value &&
-        isObject(value) &&
-        value.constructor &&
-        value.constructor.name &&
-        value.constructor.name !== 'Object'
-      ) {
-        if (!options.allowClass) {
+      if (isRegExp(value)) {
+        if (!options.allowRegExp) {
           return undefined;
         }
-
-        try {
-          Object.assign(value, { '_constructor-name_': value.constructor.name });
-        } catch (e) {
-          // immutable objects can't be written to and throw
-          // we could make a deep copy but if the user values the correct instance name,
-          // the user should make the deep copy themselves.
-        }
+        return `_regexp_${value.flags}|${value.source}`;
       }
 
-      keys.push(key);
-      stack.unshift(value);
-      objects.push({ keys: keys.join('.'), value });
-      return value;
-    }
+      if (isFunction(value)) {
+        if (!options.allowFunction) {
+          return undefined;
+        }
+        const { name } = value;
+        const stringified = value.toString();
 
-    //  actually, here's the only place where the keys keeping is useful
-    return `_duplicate_${found.keys}`;
+        if (
+          !stringified.match(
+            /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
+          )
+        ) {
+          return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
+        }
+        return `_function_${name}|${(() => {}).toString()}`;
+      }
+
+      if (isSymbol(value)) {
+        if (!options.allowSymbol) {
+          return undefined;
+        }
+        return `_symbol_${value.toString().slice(7, -1)}`;
+      }
+
+      if (typeof value === 'string' && dateFormat.test(value)) {
+        if (!options.allowDate) {
+          return undefined;
+        }
+        return `_date_${value}`;
+      }
+
+      if (value === undefined) {
+        if (!options.allowUndefined) {
+          return undefined;
+        }
+        return '_undefined_';
+      }
+
+      if (typeof value === 'number') {
+        if (value === -Infinity) {
+          return '_-Infinity_';
+        }
+        if (value === Infinity) {
+          return '_Infinity_';
+        }
+        if (Number.isNaN(value)) {
+          return '_NaN_';
+        }
+
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        return value;
+      }
+
+      if (typeof value === 'boolean') {
+        return value;
+      }
+
+      if (stack.length >= options.maxDepth) {
+        if (Array.isArray(value)) {
+          return `[Array(${value.length})]`;
+        }
+        return '[Object]';
+      }
+
+      const found = objects.find(o => o.value === value);
+      if (!found) {
+        if (
+          value &&
+          isObject(value) &&
+          value.constructor &&
+          value.constructor.name &&
+          value.constructor.name !== 'Object'
+        ) {
+          if (!options.allowClass) {
+            return undefined;
+          }
+
+          try {
+            Object.assign(value, { '_constructor-name_': value.constructor.name });
+          } catch (e) {
+            // immutable objects can't be written to and throw
+            // we could make a deep copy but if the user values the correct instance name,
+            // the user should make the deep copy themselves.
+          }
+        }
+
+        keys.push(key);
+        stack.unshift(value);
+        objects.push({ keys: keys.join('.'), value });
+        return value;
+      }
+
+      //  actually, here's the only place where the keys keeping is useful
+      return `_duplicate_${found.keys}`;
+    } catch (e) {
+      return undefined;
+    }
   };
 };
 
@@ -372,7 +376,7 @@ const mutator = () => {
 };
 
 export const parse = (data: string, options: Partial<Options> = {}) => {
-  const mergedOptions: Options = Object.assign({}, defaultOptions, options);
+  const mergedOptions: Options = { ...defaultOptions, ...options};
   const result = JSON.parse(data, reviver(mergedOptions));
 
   mutator()(result);
