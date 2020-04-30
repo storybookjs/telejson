@@ -132,7 +132,7 @@ const tests = ({ stringify, parse }) => {
     const stringified = stringify(Fruit);
     const parsed = parse(stringified);
 
-    expect(stringified).toEqual('{"apple":true,"parent":{},"cyclic":"_duplicate_root"}');
+    expect(stringified).toEqual('{"apple":true,"parent":{},"cyclic":"_duplicate_[]"}');
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
     expect(parsed.cyclic).toBe(parsed);
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
@@ -294,6 +294,19 @@ const tests = ({ stringify, parse }) => {
     Object.entries(parsed).forEach((k, v) => {
       expect(data[k]).toEqual(parsed[k]);
     });
+  });
+
+  test('dots in keys', () => {
+    class Foo {}
+    class Bar {}
+    const foo = new Foo();
+    const bar = new Bar();
+    const data = { 'foo.a': bar, 'foo': { 'a': foo }, 'foo.b': foo };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified);
+
+    expect(parsed['foo.b'].constructor.name).toEqual('Foo')
   });
 };
 

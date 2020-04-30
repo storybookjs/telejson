@@ -106,8 +106,8 @@ export const replacer = function replacer(options: Options) {
     try {
       //  very first iteration
       if (key === '') {
-        keys = ['root'];
-        objects = [{ keys: 'root', value }];
+        keys = [];
+        objects = [{ keys: '[]', value }];
         stack = [];
         return value;
       }
@@ -217,7 +217,7 @@ export const replacer = function replacer(options: Options) {
 
         keys.push(key);
         stack.unshift(value);
-        objects.push({ keys: keys.join('.'), value });
+        objects.push({ keys: JSON.stringify(keys), value });
         return value;
       }
 
@@ -245,12 +245,13 @@ export const reviver = function reviver(options: Options) {
 
       // restore cyclic refs
       refs.forEach(({ target, container, replacement }) => {
-        if (replacement === 'root') {
+        const replacementArr = JSON.parse(replacement);
+        if (replacementArr.length === 0) {
           // eslint-disable-next-line no-param-reassign
           container[target] = root;
         } else {
           // eslint-disable-next-line no-param-reassign
-          container[target] = get(root, replacement.replace('root.', ''));
+          container[target] = get(root, replacementArr);
         }
       });
     }
@@ -306,7 +307,7 @@ export const reviver = function reviver(options: Options) {
     }
 
     if (typeof value === 'string' && value.startsWith('_duplicate_')) {
-      refs.push({ target: key, container: this, replacement: value.replace('_duplicate_', '') });
+      refs.push({ target: key, container: this, replacement: value.replace(/^_duplicate_/, '') });
       return null;
     }
 
