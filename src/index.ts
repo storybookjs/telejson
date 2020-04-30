@@ -56,13 +56,13 @@ const removeCodeComments = (code: string) => {
   return newCode;
 };
 
-const cleanCode = memoize(10000)(code =>
+const cleanCode = memoize(10000)((code) =>
   removeCodeComments(code)
     .replace(/\n\s*/g, '') // remove indents & newlines
     .trim()
 );
 
-const convertShorthandMethods = function(key: string, stringified: string) {
+const convertShorthandMethods = function (key: string, stringified: string) {
   const fnHead = stringified.slice(0, stringified.indexOf('{'));
   const fnBody = stringified.slice(stringified.indexOf('{'));
 
@@ -193,7 +193,7 @@ export const replacer = function replacer(options: Options) {
         return '[Object]';
       }
 
-      const found = objects.find(o => o.value === value);
+      const found = objects.find((o) => o.value === value);
       if (!found) {
         if (
           value &&
@@ -368,7 +368,7 @@ const mutator = () => {
       });
     }
     if (Array.isArray(value)) {
-      value.forEach(v => {
+      value.forEach((v) => {
         mutated.push(v);
         mutateUndefined(v);
       });
@@ -377,7 +377,7 @@ const mutator = () => {
 };
 
 export const parse = (data: string, options: Partial<Options> = {}) => {
-  const mergedOptions: Options = { ...defaultOptions, ...options};
+  const mergedOptions: Options = { ...defaultOptions, ...options };
   const result = JSON.parse(data, reviver(mergedOptions));
 
   mutator()(result);

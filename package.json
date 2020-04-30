@@ -52,7 +52,7 @@
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-typescript": "^7.9.0",
-    "@storybook/eslint-config-storybook": "^2.3.0",
+    "@storybook/eslint-config-storybook": "^2.4.0",
     "@types/jest": "^25.2.1",
     "@types/lodash": "^4.14.150",
     "babel-core": "7.0.0-bridge.0",
