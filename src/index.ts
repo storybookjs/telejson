@@ -244,7 +244,9 @@ export const reviver = function reviver(options: Options) {
 
       // restore cyclic refs
       refs.forEach(({ target, container, replacement }) => {
-        const replacementArr = isJSON(replacement) ? JSON.parse(replacement) : replacement.split('.');
+        const replacementArr = isJSON(replacement)
+          ? JSON.parse(replacement)
+          : replacement.split('.');
         if (replacementArr.length === 0) {
           // eslint-disable-next-line no-param-reassign
           container[target] = root;
