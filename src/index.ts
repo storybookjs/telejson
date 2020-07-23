@@ -3,7 +3,6 @@ import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
 import get from 'lodash/get';
-import transform from 'lodash/transform';
 import memoize from 'memoizerific';
 
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
@@ -56,7 +55,7 @@ const removeCodeComments = (code: string) => {
   return newCode;
 };
 
-const cleanCode = memoize(10000)((code) =>
+const cleanCode = memoize(10000)((code: string) =>
   removeCodeComments(code)
     .replace(/\n\s*/g, '') // remove indents & newlines
     .trim()
@@ -245,7 +244,7 @@ export const reviver = function reviver(options: Options) {
 
       // restore cyclic refs
       refs.forEach(({ target, container, replacement }) => {
-        const replacementArr = JSON.parse(replacement);
+        const replacementArr = isJSON(replacement) ? JSON.parse(replacement) : replacement.split('.');
         if (replacementArr.length === 0) {
           // eslint-disable-next-line no-param-reassign
           container[target] = root;

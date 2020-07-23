@@ -5,7 +5,7 @@ const regex1 = /foo/;
 const regex2 = /foo/g;
 const regex3 = new RegExp('foo', 'i');
 
-const fn1 = x => x + x;
+const fn1 = (x) => x + x;
 const fn2 = function x(x) {
   return x - x;
 };
@@ -151,7 +151,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('check function value', () => {
-    const Fruit = function(value) {
+    const Fruit = function (value) {
       return [value, 'apple'];
     };
     const data = { FunctionFruit: Fruit };
@@ -281,7 +281,7 @@ const tests = ({ stringify, parse }) => {
       g: undefined,
       h: null,
       i: () => {},
-      j: function() {},
+      j() {},
     };
 
     const stringified = stringify(data);
@@ -301,12 +301,13 @@ const tests = ({ stringify, parse }) => {
     class Bar {}
     const foo = new Foo();
     const bar = new Bar();
-    const data = { 'foo.a': bar, 'foo': { 'a': foo }, 'foo.b': foo };
+    const data = { 'foo.a': bar, foo: { a: foo }, 'foo.b': foo };
 
     const stringified = stringify(data);
+
     const parsed = parse(stringified);
 
-    expect(parsed['foo.b'].constructor.name).toEqual('Foo')
+    expect(parsed['foo.b'].constructor.name).toEqual('Foo');
   });
 };
 
