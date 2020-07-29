@@ -118,17 +118,11 @@ export const replacer = function replacer(options: Options) {
         keys.pop();
       }
 
-      if (isRegExp(value)) {
-        if (!options.allowRegExp) {
-          return undefined;
-        }
+      if (options.allowRegExp && isRegExp(value)) {
         return `_regexp_${value.flags}|${value.source}`;
       }
 
-      if (isFunction(value)) {
-        if (!options.allowFunction) {
-          return undefined;
-        }
+      if (options.allowFunction && isFunction(value)) {
         const { name } = value;
         const stringified = value.toString();
 
@@ -142,24 +136,15 @@ export const replacer = function replacer(options: Options) {
         return `_function_${name}|${(() => {}).toString()}`;
       }
 
-      if (isSymbol(value)) {
-        if (!options.allowSymbol) {
-          return undefined;
-        }
+      if (options.allowSymbol && isSymbol(value)) {
         return `_symbol_${value.toString().slice(7, -1)}`;
       }
 
-      if (typeof value === 'string' && dateFormat.test(value)) {
-        if (!options.allowDate) {
-          return undefined;
-        }
+      if (options.allowDate && typeof value === 'string' && dateFormat.test(value)) {
         return `_date_${value}`;
       }
 
-      if (value === undefined) {
-        if (!options.allowUndefined) {
-          return undefined;
-        }
+      if (options.allowUndefined && value === undefined) {
         return '_undefined_';
       }
 
