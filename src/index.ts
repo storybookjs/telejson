@@ -97,7 +97,7 @@ interface Options {
 }
 
 export const replacer = function replacer(options: Options) {
-  let objects: { keys: string; value: any }[];
+  let objects: Map<any, string>;
   let stack: any[];
   let keys: string[];
 
@@ -106,7 +106,7 @@ export const replacer = function replacer(options: Options) {
       //  very first iteration
       if (key === '') {
         keys = [];
-        objects = [{ keys: '[]', value }];
+        objects = new Map([[value, '[]']]);
         stack = [];
         return value;
       }
@@ -192,7 +192,7 @@ export const replacer = function replacer(options: Options) {
         return '[Object]';
       }
 
-      const found = objects.find((o) => o.value === value);
+      const found = objects.get(value);
       if (!found) {
         if (
           value &&
@@ -216,12 +216,12 @@ export const replacer = function replacer(options: Options) {
 
         keys.push(key);
         stack.unshift(value);
-        objects.push({ keys: JSON.stringify(keys), value });
+        objects.set(value, JSON.stringify(keys));
         return value;
       }
 
       //  actually, here's the only place where the keys keeping is useful
-      return `_duplicate_${found.keys}`;
+      return `_duplicate_${found}`;
     } catch (e) {
       return undefined;
     }
@@ -353,7 +353,7 @@ export const stringify = (data: any, options: Partial<Options> = {}) => {
 };
 
 const mutator = () => {
-  const mutated: any[] = [];
+  const mutated: Record<any, boolean> = {};
   return function mutateUndefined(value: any) {
     // JSON.parse will not output keys with value of undefined
     // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
@@ -362,15 +362,15 @@ const mutator = () => {
         if (v === '_undefined_') {
           // eslint-disable-next-line no-param-reassign
           value[k] = undefined;
-        } else if (!mutated.includes(v)) {
-          mutated.push(v);
+        } else if (!mutated[v]) {
+          mutated[v] = true;
           mutateUndefined(v);
         }
       });
     }
     if (Array.isArray(value)) {
       value.forEach((v) => {
-        mutated.push(v);
+        mutated[v] = true;
         mutateUndefined(v);
       });
     }
