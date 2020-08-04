@@ -11,6 +11,7 @@ yarn add telejson
 ## What can it do, what can't it do:
 
 `JSON.parse` & `JSON.stringify` have limitation by design, because there are no data formats for things like
+
 - Date
 - Function
 - Class
@@ -26,7 +27,7 @@ and then convert back to the cyclic data structure when parsing.
 When parsing, **class instances** will be given the Class's name again.
 The prototype isn't copied over.
 
-**Functions** are supported, they are stringified and will be eval-ed when called. 
+**Functions** are supported, they are stringified and will be eval-ed when called.
 This lazy eval is important for performance.
 The eval happens via `eval()`
 Functions are stripped of comments and whitespace.
@@ -46,15 +47,17 @@ You have 2 choices:
 ```js
 import { stringify, parse } from 'telejson';
 
-const Foo = function(){};
+const Foo = function () {};
 
 const root = {
   date: new Date('2018'),
   regex1: /foo/,
   regex2: /foo/g,
-  regex2: new RegExp('foo','i'),
+  regex2: new RegExp('foo', 'i'),
   fn1: () => 'foo',
-  fn2: function fn2() { return 'foo'; },
+  fn2: function fn2() {
+    return 'foo';
+  },
   Foo: new Foo(),
 };
 
@@ -96,7 +99,7 @@ stringify(date, { maxDepth: 10 });
 
 ### replacer
 
-`maxDepth`: controls how deep to keep stringifying. When max depth is reach, 
+`maxDepth`: controls how deep to keep stringifying. When max depth is reach,
 objects will be replaced with `"[Object]"`, arrays will be replaced with `"[Array(<length>)]"`.
 default value is `10`
 This option is really useful if your object is huge/complex, and you don't care about the deeply nested data.
@@ -122,6 +125,10 @@ Only relevant when using `stringify`.
 `lazyEval`: When set to false, lazy eval will be disabled. (default true)
 
 Note: disabling lazy eval will affect performance. Consider disabling it only if you truly need to.
+
+## Requirements
+
+`telejson` depends on the collection type `Map`. If you support older browsers and devices which may not yet provide these natively (e.g. IE < 11) or which have non-compliant implementations (e.g. IE 11), consider including a global polyfill in your bundled application, such as `core-js` or `babel-polyfill`.
 
 ## Contributing
 
