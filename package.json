@@ -44,7 +44,7 @@
     "@types/is-function": "^1.0.0",
     "global": "^4.4.0",
     "is-function": "^1.0.2",
-    "is-regex": "^1.1.0",
+    "is-regex": "^1.1.1",
     "is-symbol": "^1.0.3",
     "isobject": "^4.0.0",
     "lodash": "^4.17.19",
