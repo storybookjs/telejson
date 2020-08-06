@@ -118,6 +118,42 @@ export const replacer = function replacer(options: Options) {
         keys.pop();
       }
 
+      if (typeof value === 'boolean') {
+        return value;
+      }
+
+      if (value === undefined) {
+        if (!options.allowUndefined) {
+          return undefined;
+        }
+        return '_undefined_';
+      }
+
+      if (typeof value === 'number') {
+        if (value === -Infinity) {
+          return '_-Infinity_';
+        }
+        if (value === Infinity) {
+          return '_Infinity_';
+        }
+        if (Number.isNaN(value)) {
+          return '_NaN_';
+        }
+
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        if (dateFormat.test(value)) {
+          if (!options.allowDate) {
+            return undefined;
+          }
+          return `_date_${value}`;
+        }
+
+        return value;
+      }
+
       if (isRegExp(value)) {
         if (!options.allowRegExp) {
           return undefined;
@@ -147,42 +183,6 @@ export const replacer = function replacer(options: Options) {
           return undefined;
         }
         return `_symbol_${value.toString().slice(7, -1)}`;
-      }
-
-      if (typeof value === 'string' && dateFormat.test(value)) {
-        if (!options.allowDate) {
-          return undefined;
-        }
-        return `_date_${value}`;
-      }
-
-      if (value === undefined) {
-        if (!options.allowUndefined) {
-          return undefined;
-        }
-        return '_undefined_';
-      }
-
-      if (typeof value === 'number') {
-        if (value === -Infinity) {
-          return '_-Infinity_';
-        }
-        if (value === Infinity) {
-          return '_Infinity_';
-        }
-        if (Number.isNaN(value)) {
-          return '_NaN_';
-        }
-
-        return value;
-      }
-
-      if (typeof value === 'string') {
-        return value;
-      }
-
-      if (typeof value === 'boolean') {
-        return value;
       }
 
       if (stack.length >= options.maxDepth) {
