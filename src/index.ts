@@ -353,7 +353,7 @@ export const stringify = (data: any, options: Partial<Options> = {}) => {
 };
 
 const mutator = () => {
-  const mutated: Record<any, boolean> = {};
+  const mutated: Map<any, boolean> = new Map();
   return function mutateUndefined(value: any) {
     // JSON.parse will not output keys with value of undefined
     // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
@@ -362,15 +362,15 @@ const mutator = () => {
         if (v === '_undefined_') {
           // eslint-disable-next-line no-param-reassign
           value[k] = undefined;
-        } else if (!mutated[v]) {
-          mutated[v] = true;
+        } else if (!mutated.get(v)) {
+          mutated.set(v, true);
           mutateUndefined(v);
         }
       });
     }
     if (Array.isArray(value)) {
       value.forEach((v) => {
-        mutated[v] = true;
+        mutated.set(v, true);
         mutateUndefined(v);
       });
     }
