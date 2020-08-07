@@ -43,6 +43,8 @@ const nested = {
   },
 };
 
+const undef = undefined;
+
 const data = {
   regex1,
   regex2,
@@ -56,6 +58,7 @@ const data = {
   date,
   foo: new Foo(),
   nested,
+  undef,
 };
 
 data.cyclic = data;
@@ -96,6 +99,8 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.foo).toBeDefined();
     expect(parsed.foo.constructor.name).toBe('Foo');
     expect(parsed.foo instanceof Foo).toBe(false);
+
+    expect(parsed.undef).toBeUndefined();
   });
 
   test('maxDepth', () => {
@@ -294,6 +299,25 @@ const tests = ({ stringify, parse }) => {
     Object.entries(parsed).forEach((k, v) => {
       expect(data[k]).toEqual(parsed[k]);
     });
+  });
+
+  test('nested arrays', () => {
+    const stringified = stringify({
+      key: 'storybook-channel',
+      event: {
+        type: 'resetStoryArgs',
+        args: [
+          {
+            storyId: 'addons-controls--basic',
+            argNames: undefined,
+            options: { target: 'storybook-preview-iframe' },
+          },
+        ],
+        from: 'ca341e9487ddc',
+      },
+      refId: undefined,
+    });
+    expect(parse(stringified)).toMatchSnapshot();
   });
 
   test('dots in keys', () => {
