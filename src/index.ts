@@ -229,7 +229,7 @@ export const replacer = function replacer(options: Options) {
 };
 
 interface ValueContainer {
-  '_constructor-name_': string;
+  '_constructor-name_'?: string;
   [keys: string]: any;
 }
 
