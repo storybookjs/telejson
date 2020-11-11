@@ -77,14 +77,14 @@ OR you can use use the `replacer` and `reviver`:
 import { replacer, reviver } from 'telejson';
 import data from 'somewhere';
 
-const stringified = JSON.stringify(data, reviver(), 2);
+const stringified = JSON.stringify(data, replacer(), 2);
 const parsed = JSON.parse(stringified, reviver(), 2);
 ```
 
 notice that both replacer and reviver need to be called! doing the following will NOT WORK:
 
 ```
-const stringified = JSON.stringify(data, reviver, 2);
+const stringified = JSON.stringify(data, replacer, 2);
 const parsed = JSON.parse(stringified, reviver, 2);
 ```
 
