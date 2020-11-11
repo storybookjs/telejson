@@ -369,9 +369,14 @@ const mutator = () => {
       });
     }
     if (Array.isArray(value)) {
-      value.forEach((v) => {
+      value.forEach((v, index) => {
         mutated.set(v, true);
         mutateUndefined(v);
+        if (v === '_undefined_') {
+          mutated.set(v, true);
+          // eslint-disable-next-line no-param-reassign
+          value[index] = undefined;
+        }
       });
     }
   };
