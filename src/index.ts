@@ -84,7 +84,7 @@ const convertShorthandMethods = function (key: string, stringified: string) {
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
-interface Options {
+export interface Options {
   allowRegExp: boolean;
   allowFunction: boolean;
   allowSymbol: boolean;
