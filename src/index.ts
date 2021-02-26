@@ -143,6 +143,10 @@ export const replacer = function replacer(options: Options) {
         return value;
       }
 
+      if (typeof value === 'bigint') {
+        return `_bigint_${value.toString()}`;
+      }
+
       if (typeof value === 'string') {
         if (dateFormat.test(value)) {
           if (!options.allowDate) {
@@ -326,6 +330,10 @@ export const reviver = function reviver(options: Options) {
 
     if (typeof value === 'string' && value === '_NaN_') {
       return NaN;
+    }
+
+    if (typeof value === 'string' && value.startsWith('_bigint_')) {
+      return BigInt(value.replace('_bigint_', ''));
     }
 
     return value;
