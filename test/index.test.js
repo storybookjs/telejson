@@ -204,6 +204,17 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.SymbleFruit.toString()).toEqual('Symbol(apple)');
   });
 
+  test('check global symbol value', () => {
+    const data = { GlobalSymbolFruit: Symbol.for('grapes') };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified);
+
+    expect(stringified).toEqual('{"GlobalSymbolFruit":"_gsymbol_grapes"}');
+    expect(parsed.GlobalSymbolFruit.toString()).toEqual('Symbol(grapes)');
+    expect(parsed.GlobalSymbolFruit).toEqual(Symbol.for('grapes'));
+  });
+
   test('check minus Infinity value', () => {
     const data = { InfinityFruit: -Infinity };
 
