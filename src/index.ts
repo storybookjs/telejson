@@ -332,7 +332,7 @@ export const reviver = function reviver(options: Options) {
       return NaN;
     }
 
-    if (typeof value === 'string' && value.startsWith('_bigint_')) {
+    if (typeof value === 'string' && value.startsWith('_bigint_') && typeof BigInt === 'function') {
       return BigInt(value.replace('_bigint_', ''));
     }
 
