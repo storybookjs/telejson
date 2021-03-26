@@ -276,7 +276,7 @@ export const reviver = function reviver(options: Options) {
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
-      const sourceSanitized = source.replace(/[(\(\))|\\| ]*$/,'');
+      const sourceSanitized = source.replace(/[(\(\))|\\| |\]]*$/,'');
 
       if (!options.lazyEval) {
         // eslint-disable-next-line no-eval
