@@ -5,6 +5,7 @@ import isObjectAny from 'isobject';
 import get from 'lodash/get';
 import memoize from 'memoizerific';
 
+// eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
 const removeCodeComments = (code: string) => {
@@ -95,6 +96,9 @@ export interface Options {
   space: number | undefined;
   lazyEval: boolean;
 }
+
+// eslint-disable-next-line no-useless-escape
+export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 export const replacer = function replacer(options: Options) {
   let objects: Map<any, string>;
@@ -276,7 +280,8 @@ export const reviver = function reviver(options: Options) {
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
-      const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/,'');
+      // eslint-disable-next-line no-useless-escape
+      const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
 
       if (!options.lazyEval) {
         // eslint-disable-next-line no-eval
@@ -332,9 +337,6 @@ export const reviver = function reviver(options: Options) {
     return value;
   };
 };
-
-// eslint-disable-next-line no-useless-escape
-export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 const defaultOptions: Options = {
   maxDepth: 10,
