@@ -1,6 +1,6 @@
 {
   "name": "telejson",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "",
   "keywords": [
     "JSON",
@@ -44,28 +44,28 @@
     "@types/is-function": "^1.0.0",
     "global": "^4.4.0",
     "is-function": "^1.0.2",
-    "is-regex": "^1.1.1",
+    "is-regex": "^1.1.2",
     "is-symbol": "^1.0.3",
     "isobject": "^4.0.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "memoizerific": "^1.11.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.1",
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/preset-typescript": "^7.12.1",
-    "@storybook/eslint-config-storybook": "^2.4.0",
-    "@types/jest": "^26.0.15",
-    "@types/lodash": "^4.14.165",
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-typescript": "^7.13.0",
+    "@storybook/eslint-config-storybook": "^3.0.0",
+    "@types/jest": "^26.0.22",
+    "@types/lodash": "^4.14.168",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^26.6.3",
     "common-tags": "^1.8.0",
-    "eslint": "^7.13.0",
+    "eslint": "^7.23.0",
     "jest": "^26.6.3",
-    "prettier": "^2.1.2",
+    "prettier": "^2.2.1",
     "regenerator-runtime": "^0.13.7",
-    "typescript": "^4.0.5"
+    "typescript": "^4.2.3"
   },
   "publishConfig": {
     "access": "public"
