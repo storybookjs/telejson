@@ -30,7 +30,9 @@
     "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
     "lint": "eslint src --ext .js,.ts",
     "prepublish": "yarn build",
-    "test": "TZ=UTC jest"
+    "test": "yarn test-node && yarn test-browser",
+    "test-browser": "TZ=UTC jest --env=jsdom ./common ./browser",
+    "test-node": "TZ=UTC jest --env=node ./common ./node"
   },
   "eslintConfig": {
     "extends": [
@@ -41,7 +43,6 @@
     }
   },
   "jest": {
-    "testEnvironment": "jsdom"
   },
   "dependencies": {
     "@types/is-function": "^1.0.0",
