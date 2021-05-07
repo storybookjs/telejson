@@ -35,10 +35,13 @@
   "eslintConfig": {
     "extends": [
       "@storybook/eslint-config-storybook"
-    ]
+    ],
+    "env": {
+      "browser": true
+    }
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "jsdom"
   },
   "dependencies": {
     "@types/is-function": "^1.0.0",

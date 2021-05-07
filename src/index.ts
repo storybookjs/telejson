@@ -4,6 +4,9 @@ import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
 import get from 'lodash/get';
 import memoize from 'memoizerific';
+import { extractEventHiddenProperties } from './dom-event';
+
+const isRunningInBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 // eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
@@ -338,6 +341,17 @@ export const reviver = function reviver(options: Options) {
   };
 };
 
+function convertUnconventionalData(data: unknown) {
+  // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
+  // Plus we need to check if running in a browser to ensure `Event` exist and
+  // is really the dom Event class.
+  if (isRunningInBrowser && data instanceof Event) {
+    return extractEventHiddenProperties(data);
+  }
+
+  return data;
+}
+
 const defaultOptions: Options = {
   maxDepth: 10,
   space: undefined,
@@ -350,9 +364,9 @@ const defaultOptions: Options = {
   lazyEval: true,
 };
 
-export const stringify = (data: any, options: Partial<Options> = {}) => {
+export const stringify = (data: unknown, options: Partial<Options> = {}) => {
   const mergedOptions: Options = { ...defaultOptions, ...options };
-  return JSON.stringify(data, replacer(mergedOptions), options.space);
+  return JSON.stringify(convertUnconventionalData(data), replacer(mergedOptions), options.space);
 };
 
 const mutator = () => {
