@@ -103,6 +103,17 @@ export interface Options {
 // eslint-disable-next-line no-useless-escape
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
+function convertUnconventionalData(data: unknown) {
+  // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
+  // Plus we need to check if running in a browser to ensure `Event` exist and
+  // is really the dom Event class.
+  if (isRunningInBrowser && data instanceof Event) {
+    return extractEventHiddenProperties(data);
+  }
+
+  return data;
+}
+
 export const replacer = function replacer(options: Options) {
   let objects: Map<any, string>;
   let stack: any[];
@@ -224,7 +235,7 @@ export const replacer = function replacer(options: Options) {
         keys.push(key);
         stack.unshift(value);
         objects.set(value, JSON.stringify(keys));
-        return value;
+        return convertUnconventionalData(value);
       }
 
       //  actually, here's the only place where the keys keeping is useful
@@ -340,17 +351,6 @@ export const reviver = function reviver(options: Options) {
     return value;
   };
 };
-
-function convertUnconventionalData(data: unknown) {
-  // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
-  // Plus we need to check if running in a browser to ensure `Event` exist and
-  // is really the dom Event class.
-  if (isRunningInBrowser && data instanceof Event) {
-    return extractEventHiddenProperties(data);
-  }
-
-  return data;
-}
 
 const defaultOptions: Options = {
   maxDepth: 10,
