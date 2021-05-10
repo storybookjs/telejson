@@ -1,6 +1,6 @@
 {
   "name": "telejson",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "description": "",
   "keywords": [
     "JSON",
@@ -42,8 +42,7 @@
       "browser": true
     }
   },
-  "jest": {
-  },
+  "jest": {},
   "dependencies": {
     "@types/is-function": "^1.0.0",
     "global": "^4.4.0",
