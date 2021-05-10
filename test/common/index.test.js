@@ -1,5 +1,5 @@
-import * as src from '../src/index';
-import * as dist from '../dist/index';
+import * as src from '../../src';
+import * as dist from '../../dist';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
@@ -122,10 +122,6 @@ const tests = ({ stringify, parse }) => {
     const stringifiedSpaced = stringify(data, { space: 2 });
 
     expect(stringifiedSpaced).toMatchSnapshot();
-  });
-
-  test('stringify the global object', () => {
-    expect(() => stringify(global, { maxDepth: 10000 })).not.toThrow();
   });
 
   test('check duplicate value', () => {
