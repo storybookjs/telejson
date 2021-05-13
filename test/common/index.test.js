@@ -230,6 +230,16 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
+  test('check BigInt value', () => {
+    const data = { LotOfFruits: BigInt('123456789123456789123456789123456789') };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified);
+
+    expect(stringified).toEqual('{"LotOfFruits":"_bigint_123456789123456789123456789123456789"}');
+    expect(parsed).toMatchObject(data);
+  });
+
   test('check undefined value', () => {
     const data = { undefinedFruit: undefined };
 
