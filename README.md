@@ -40,6 +40,8 @@ Functions are stripped of comments and whitespace.
 
 **Dates** are parsed back into actual Date objects.
 
+**DOM Events** are processed to extract the internal (hidden) properties, resulting in an object containing the same properties but not being an instance of the original class.
+
 ## API
 
 You have 2 choices:

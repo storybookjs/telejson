@@ -4,7 +4,11 @@ import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
 import get from 'lodash/get';
 import memoize from 'memoizerific';
+import { extractEventHiddenProperties } from './dom-event';
 
+const isRunningInBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+// eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
 const removeCodeComments = (code: string) => {
@@ -96,6 +100,20 @@ export interface Options {
   lazyEval: boolean;
 }
 
+// eslint-disable-next-line no-useless-escape
+export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
+
+function convertUnconventionalData(data: unknown) {
+  // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
+  // Plus we need to check if running in a browser to ensure `Event` exist and
+  // is really the dom Event class.
+  if (isRunningInBrowser && data instanceof Event) {
+    return extractEventHiddenProperties(data);
+  }
+
+  return data;
+}
+
 export const replacer = function replacer(options: Options) {
   let objects: Map<any, string>;
   let stack: any[];
@@ -141,6 +159,10 @@ export const replacer = function replacer(options: Options) {
         }
 
         return value;
+      }
+
+      if (typeof value === 'bigint') {
+        return `_bigint_${value.toString()}`;
       }
 
       if (typeof value === 'string') {
@@ -223,7 +245,7 @@ export const replacer = function replacer(options: Options) {
         keys.push(key);
         stack.unshift(value);
         objects.set(value, JSON.stringify(keys));
-        return value;
+        return convertUnconventionalData(value);
       }
 
       //  actually, here's the only place where the keys keeping is useful
@@ -282,20 +304,22 @@ export const reviver = function reviver(options: Options) {
 
     if (typeof value === 'string' && value.startsWith('_function_')) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
+      // eslint-disable-next-line no-useless-escape
+      const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
 
       if (!options.lazyEval) {
         // eslint-disable-next-line no-eval
-        return eval(`(${source})`);
+        return eval(`(${sourceSanitized})`);
       }
 
       // lazy eval of the function
       const result = (...args: any[]) => {
         // eslint-disable-next-line no-eval
-        const f = eval(`(${source})`);
+        const f = eval(`(${sourceSanitized})`);
         return f(...args);
       };
       Object.defineProperty(result, 'toString', {
-        value: () => source,
+        value: () => sourceSanitized,
       });
       Object.defineProperty(result, 'name', {
         value: name,
@@ -338,12 +362,13 @@ export const reviver = function reviver(options: Options) {
       return NaN;
     }
 
+    if (typeof value === 'string' && value.startsWith('_bigint_') && typeof BigInt === 'function') {
+      return BigInt(value.replace('_bigint_', ''));
+    }
+
     return value;
   };
 };
-
-// eslint-disable-next-line no-useless-escape
-export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 const defaultOptions: Options = {
   maxDepth: 10,
@@ -357,9 +382,9 @@ const defaultOptions: Options = {
   lazyEval: true,
 };
 
-export const stringify = (data: any, options: Partial<Options> = {}) => {
+export const stringify = (data: unknown, options: Partial<Options> = {}) => {
   const mergedOptions: Options = { ...defaultOptions, ...options };
-  return JSON.stringify(data, replacer(mergedOptions), options.space);
+  return JSON.stringify(convertUnconventionalData(data), replacer(mergedOptions), options.space);
 };
 
 const mutator = () => {

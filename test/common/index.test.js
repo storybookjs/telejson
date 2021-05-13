@@ -1,5 +1,5 @@
-import * as src from '../src/index';
-import * as dist from '../dist/index';
+import * as src from '../../src';
+import * as dist from '../../dist';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
@@ -124,10 +124,6 @@ const tests = ({ stringify, parse }) => {
     expect(stringifiedSpaced).toMatchSnapshot();
   });
 
-  test('stringify the global object', () => {
-    expect(() => stringify(global, { maxDepth: 10000 })).not.toThrow();
-  });
-
   test('check duplicate value', () => {
     const Fruit = {
       apple: true,
@@ -242,6 +238,16 @@ const tests = ({ stringify, parse }) => {
     const parsed = parse(stringified);
 
     expect(stringified).toEqual('{"NaNFruit":"_NaN_"}');
+    expect(parsed).toMatchObject(data);
+  });
+
+  test('check BigInt value', () => {
+    const data = { LotOfFruits: BigInt('123456789123456789123456789123456789') };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified);
+
+    expect(stringified).toEqual('{"LotOfFruits":"_bigint_123456789123456789123456789123456789"}');
     expect(parsed).toMatchObject(data);
   });
 
