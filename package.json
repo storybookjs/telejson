@@ -26,8 +26,16 @@
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
   "scripts": {
-    "build": "babel src --out-dir dist --extensions \".ts\" && tsc --emitDeclarationOnly",
+    "build:cjs": "babel src --out-dir dist --extensions \".ts\" --out-file-extension .js",
+    "build:esm": "BABEL_ESM=true babel src --out-dir dist --extensions \".ts\" --out-file-extension .mjs",
+    "build:tsc": "tsc --emitDeclarationOnly",
+    "build": "yarn build:cjs && yarn build:esm && yarn build:tsc",
     "lint": "eslint src --ext .js,.ts",
     "prepublish": "yarn build",
     "test": "yarn test-node && yarn test-browser",
