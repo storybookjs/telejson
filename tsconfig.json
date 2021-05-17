@@ -14,7 +14,7 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "types": ["jest"],
-    "outDir": "dist"
+    "outDir": "dist/types"
   },
   "include": ["src"],
   "exclude": ["dist"]

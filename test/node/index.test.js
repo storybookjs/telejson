@@ -1,5 +1,5 @@
 import * as src from '../../src';
-import * as dist from '../../dist';
+import * as dist from '../../dist/cjs';
 
 const tests = ({ stringify }) => {
   test('stringify the global object', () => {

@@ -24,16 +24,16 @@
     "dist/*"
   ],
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "types": "dist/types/index.d.ts",
   "module": "dist/index.mjs",
   "exports": {
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.js"
+    "import": "./dist/esm/index.mjs",
+    "require": "./dist/cjs/index.js"
   },
   "scripts": {
-    "build:cjs": "babel src --out-dir dist --extensions \".ts\" --out-file-extension .js",
-    "build:esm": "BABEL_ESM=true babel src --out-dir dist --extensions \".ts\" --out-file-extension .mjs",
+    "build:cjs": "babel src --out-dir dist/cjs --extensions \".ts\"",
+    "build:esm": "BABEL_ESM=true babel src --out-dir dist/esm --extensions \".ts\"",
     "build:tsc": "tsc --emitDeclarationOnly",
     "build": "yarn build:cjs && yarn build:esm && yarn build:tsc",
     "lint": "eslint src --ext .js,.ts",
@@ -73,7 +73,7 @@
     "babel-jest": "^26.6.3",
     "common-tags": "^1.8.0",
     "eslint": "^7.23.0",
-    "jest": "^26.6.3",
+    "jest": "^26.6.3",  
     "prettier": "^2.2.1",
     "regenerator-runtime": "^0.13.7",
     "typescript": "^4.2.3"
