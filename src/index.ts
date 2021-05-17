@@ -204,6 +204,12 @@ export const replacer = function replacer(options: Options) {
         if (!options.allowSymbol) {
           return undefined;
         }
+
+        const globalRegistryKey = Symbol.keyFor(value);
+        if (globalRegistryKey !== undefined) {
+          return `_gsymbol_${globalRegistryKey}`;
+        }
+
         return `_symbol_${value.toString().slice(7, -1)}`;
       }
 
@@ -338,6 +344,10 @@ export const reviver = function reviver(options: Options) {
 
     if (typeof value === 'string' && value.startsWith('_symbol_')) {
       return Symbol(value.replace('_symbol_', ''));
+    }
+
+    if (typeof value === 'string' && value.startsWith('_gsymbol_')) {
+      return Symbol.for(value.replace('_gsymbol_', ''));
     }
 
     if (typeof value === 'string' && value === '_-Infinity_') {
