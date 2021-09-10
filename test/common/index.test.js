@@ -369,7 +369,7 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
-  test('filter out properties that throw on sub-access', () => {
+  test('filter out properties that throw on stringification', () => {
     const thrower = {
       a: 'foo',
       b: {
