@@ -121,6 +121,9 @@ function convertUnconventionalData(data: unknown) {
 
   result = Object.keys(result).reduce((acc, key) => {
     try {
+      // Try accessing a property to test if we are allowed to do so
+      result[key]?.toJSON;
+
       acc[key] = result[key];
     } catch (err) {
       wasMutated = true;
