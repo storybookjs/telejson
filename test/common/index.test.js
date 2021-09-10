@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-shadow */
 import * as src from '../../src';
 import * as dist from '../../dist/cjs';
 
@@ -71,14 +73,18 @@ const tests = ({ stringify, parse }) => {
   test('stringify', () => {
     let stringified;
 
-    expect(() => (stringified = stringify(data))).not.toThrow();
+    expect(() => {
+      stringified = stringify(data);
+    }).not.toThrow();
     expect(stringified).toMatchSnapshot();
   });
 
   test('parse', () => {
     const stringified = stringify(data);
     let parsed;
-    expect(() => (parsed = parse(stringified))).not.toThrow();
+    expect(() => {
+      parsed = parse(stringified);
+    }).not.toThrow();
     expect(parsed).toMatchSnapshot();
 
     // test the regex

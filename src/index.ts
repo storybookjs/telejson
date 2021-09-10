@@ -109,39 +109,31 @@ function convertUnconventionalData(data: unknown) {
   }
 
   let result: any = data;
+  let wasMutated = false;
 
   // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
   // Plus we need to check if running in a browser to ensure `Event` exist and
   // is really the dom Event class.
   if (isRunningInBrowser && data instanceof Event) {
-    result = extractEventHiddenProperties(data);
+    result = extractEventHiddenProperties(result);
+    wasMutated = true;
   }
-  return result;
 
-  // This code replaces fields that throw an error when accessed (e.g. window.parent in a cross-origin
-  // scenario) with the access error. We are mutating the object because if we return a new object it causes
-  // the maxDepth code to fail (not sure why!).
-  // Object.keys(result as object).forEach((key) => {
-  //   try {
-  //     result[key];
-  //   } catch (err) {
-  //     delete result[key];
-  //   }
-  // });
-  // return result;
-
-  return Object.keys(result as object).reduce((acc, key) => {
+  result = Object.keys(result).reduce((acc, key) => {
     try {
       acc[key] = result[key];
     } catch (err) {
-      delete acc[key];
+      wasMutated = true;
     }
     return acc;
   }, {} as any);
+
+  return wasMutated ? result : data;
 }
 
-export const replacer = function replacer(options: Options) {
+export const replacer = function replacer(options: Options): any {
   let objects: Map<any, string>;
+  let map: Map<any, any>;
   let stack: any[];
   let keys: string[];
 
@@ -151,13 +143,16 @@ export const replacer = function replacer(options: Options) {
       if (key === '') {
         keys = [];
         objects = new Map([[value, '[]']]);
+        map = new Map();
         stack = [];
+
         return value;
       }
 
       // From the JSON.stringify's doc:
       // "The object in which the key was found is provided as the replacer's this parameter." thus one can control the depth
-      while (stack.length && this !== stack[0]) {
+      const origin = map.get(this) || this;
+      while (stack.length && origin !== stack[0]) {
         stack.shift();
         keys.pop();
       }
@@ -171,6 +166,10 @@ export const replacer = function replacer(options: Options) {
           return undefined;
         }
         return '_undefined_';
+      }
+
+      if (value === null) {
+        return null;
       }
 
       if (typeof value === 'number') {
@@ -246,21 +245,33 @@ export const replacer = function replacer(options: Options) {
         return '[Object]';
       }
 
+      if (value === this) {
+        return `_duplicate_${JSON.stringify(keys)}`;
+      }
+
+      // when it's a class and we don't want to support classes, skip
+      if (
+        value.constructor &&
+        value.constructor.name &&
+        value.constructor.name !== 'Object' &&
+        !Array.isArray(value) &&
+        !options.allowClass
+      ) {
+        return undefined;
+      }
+
       const found = objects.get(value);
       if (!found) {
+        const converted = Array.isArray(value) ? value : convertUnconventionalData(value);
+
         if (
-          value &&
-          isObject(value) &&
           value.constructor &&
           value.constructor.name &&
-          value.constructor.name !== 'Object'
+          value.constructor.name !== 'Object' &&
+          !Array.isArray(value)
         ) {
-          if (!options.allowClass) {
-            return undefined;
-          }
-
           try {
-            Object.assign(value, { '_constructor-name_': value.constructor.name });
+            Object.assign(converted, { '_constructor-name_': value.constructor.name });
           } catch (e) {
             // immutable objects can't be written to and throw
             // we could make a deep copy but if the user values the correct instance name,
@@ -269,9 +280,13 @@ export const replacer = function replacer(options: Options) {
         }
 
         keys.push(key);
-        const converted = convertUnconventionalData(value);
         stack.unshift(converted);
-        objects.set(converted, JSON.stringify(keys));
+        objects.set(value, JSON.stringify(keys));
+
+        if (value !== converted) {
+          map.set(value, converted);
+        }
+
         return converted;
       }
 
@@ -288,7 +303,7 @@ interface ValueContainer {
   [keys: string]: any;
 }
 
-export const reviver = function reviver(options: Options) {
+export const reviver = function reviver(options: Options): any {
   const refs: { target: string; container: { [keys: string]: any }; replacement: string }[] = [];
   let root: any;
 
