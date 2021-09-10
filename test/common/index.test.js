@@ -369,6 +369,20 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
+  test('filter out properties that throw on sub-access', () => {
+    const thrower = {
+      a: 'foo',
+      b: {
+        get toJSON() {
+          throw new Error('b.toJSON is not allowed!');
+        },
+      },
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
+  });
 };
 
 describe('Source', () => {
