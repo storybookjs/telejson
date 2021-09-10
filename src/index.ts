@@ -268,7 +268,8 @@ export const replacer = function replacer(options: Options): any {
           value.constructor &&
           value.constructor.name &&
           value.constructor.name !== 'Object' &&
-          !Array.isArray(value)
+          !Array.isArray(value) &&
+          options.allowClass
         ) {
           try {
             Object.assign(converted, { '_constructor-name_': value.constructor.name });
