@@ -104,14 +104,40 @@ export interface Options {
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 function convertUnconventionalData(data: unknown) {
+  if (!isObject(data)) {
+    return data;
+  }
+
+  let result: any = data;
+
   // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
   // Plus we need to check if running in a browser to ensure `Event` exist and
   // is really the dom Event class.
   if (isRunningInBrowser && data instanceof Event) {
-    return extractEventHiddenProperties(data);
+    result = extractEventHiddenProperties(data);
   }
+  return result;
 
-  return data;
+  // This code replaces fields that throw an error when accessed (e.g. window.parent in a cross-origin
+  // scenario) with the access error. We are mutating the object because if we return a new object it causes
+  // the maxDepth code to fail (not sure why!).
+  // Object.keys(result as object).forEach((key) => {
+  //   try {
+  //     result[key];
+  //   } catch (err) {
+  //     delete result[key];
+  //   }
+  // });
+  // return result;
+
+  return Object.keys(result as object).reduce((acc, key) => {
+    try {
+      acc[key] = result[key];
+    } catch (err) {
+      delete acc[key];
+    }
+    return acc;
+  }, {} as any);
 }
 
 export const replacer = function replacer(options: Options) {
@@ -243,9 +269,10 @@ export const replacer = function replacer(options: Options) {
         }
 
         keys.push(key);
-        stack.unshift(value);
-        objects.set(value, JSON.stringify(keys));
-        return convertUnconventionalData(value);
+        const converted = convertUnconventionalData(value);
+        stack.unshift(converted);
+        objects.set(converted, JSON.stringify(keys));
+        return converted;
       }
 
       //  actually, here's the only place where the keys keeping is useful

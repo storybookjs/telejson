@@ -350,6 +350,19 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed['foo.b'].constructor.name).toEqual('Foo');
   });
+
+  test('filter out properties that throw on access', () => {
+    const thrower = {
+      a: 'foo',
+      get b() {
+        throw new Error('b is not allowed!');
+      },
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
+  });
 };
 
 describe('Source', () => {

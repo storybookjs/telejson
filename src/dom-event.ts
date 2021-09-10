@@ -29,7 +29,7 @@ const customEventSpecificProperties: Array<Exclude<keyof CustomEvent, keyof Even
  *
  * @param event The event we want to extract properties
  */
-export function extractEventHiddenProperties(event: Event): unknown {
+export function extractEventHiddenProperties(event: Event): object {
   const rebuildEvent = eventProperties
     .filter((value) => event[value] !== undefined)
     .reduce((acc, value) => {
