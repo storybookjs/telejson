@@ -12,13 +12,13 @@
     "regex",
     "stringify"
   ],
-  "homepage": "https://github.com/storybooks/telejson",
+  "homepage": "https://github.com/storybookjs/telejson",
   "bugs": {
-    "url": "https://github.com/storybooks/telejson/issues"
+    "url": "https://github.com/storybookjs/telejson/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/storybooks/telejson.git"
+    "url": "https://github.com/storybookjs/telejson.git"
   },
   "files": [
     "dist/*"
