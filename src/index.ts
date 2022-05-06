@@ -337,11 +337,11 @@ export const reviver = function reviver(options: Options): any {
     }
 
     // deal with instance names
-    if (isObject<ValueContainer>(value) && value['_constructor-name_']) {
+    if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
         // eslint-disable-next-line no-new-func
-        const Fn = new Function(`return function ${name}(){}`)();
+        const Fn = new Function(`return function ${name.replace(/[\W_]+/g, '')}(){}`)();
         Object.setPrototypeOf(value, new Fn());
       }
       // eslint-disable-next-line no-param-reassign
@@ -349,7 +349,7 @@ export const reviver = function reviver(options: Options): any {
       return value;
     }
 
-    if (typeof value === 'string' && value.startsWith('_function_')) {
+    if (typeof value === 'string' && value.startsWith('_function_') && options.allowFunction) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
       // eslint-disable-next-line no-useless-escape
       const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
@@ -374,13 +374,13 @@ export const reviver = function reviver(options: Options): any {
       return result;
     }
 
-    if (typeof value === 'string' && value.startsWith('_regexp_')) {
+    if (typeof value === 'string' && value.startsWith('_regexp_') && options.allowRegExp) {
       // this split isn't working correctly
       const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/) || [];
       return new RegExp(source, flags);
     }
 
-    if (typeof value === 'string' && value.startsWith('_date_')) {
+    if (typeof value === 'string' && value.startsWith('_date_') && options.allowDate) {
       return new Date(value.replace('_date_', ''));
     }
 
@@ -389,11 +389,11 @@ export const reviver = function reviver(options: Options): any {
       return null;
     }
 
-    if (typeof value === 'string' && value.startsWith('_symbol_')) {
+    if (typeof value === 'string' && value.startsWith('_symbol_') && options.allowSymbol) {
       return Symbol(value.replace('_symbol_', ''));
     }
 
-    if (typeof value === 'string' && value.startsWith('_gsymbol_')) {
+    if (typeof value === 'string' && value.startsWith('_gsymbol_') && options.allowSymbol) {
       return Symbol.for(value.replace('_gsymbol_', ''));
     }
 

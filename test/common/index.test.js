@@ -157,6 +157,18 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.foo instanceof Foo).toBe(false);
   });
 
+  test('NOT check constructor value when disabled via options in parse', () => {
+    const data = { ConstructorFruit: new Foo() };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified, { allowFunction: false });
+
+    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
+    expect(parsed.ConstructorFruit).toBeDefined();
+    expect(parsed.ConstructorFruit.constructor.name).toBe('Object');
+    expect(parsed.ConstructorFruit).toEqual({ '_constructor-name_': 'Foo' });
+  });
+
   test('check function value', () => {
     const Fruit = function (value) {
       return [value, 'apple'];
@@ -173,6 +185,36 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.FunctionFruit.toString()).toEqual(
       "function Fruit(value) {return [value, 'apple'];}"
     );
+  });
+
+  test('NOT check function value when disabled via options in parse', () => {
+    const Fruit = function (value) {
+      return [value, 'apple'];
+    };
+    const data = { FunctionFruit: Fruit };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified, { allowFunction: false });
+
+    expect(stringified).toEqual(
+      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
+    );
+    expect(parsed.FunctionFruit).toEqual(
+      "_function_Fruit|function Fruit(value) {return [value, 'apple'];}"
+    );
+  });
+
+  test('NOT check function value when disabled via options in stringify', () => {
+    const Fruit = function (value) {
+      return [value, 'apple'];
+    };
+    const data = { FunctionFruit: Fruit };
+
+    const stringified = stringify(data, { allowFunction: false });
+    const parsed = parse(stringified);
+
+    expect(stringified).toEqual('{}');
+    expect(parsed.FunctionFruit).not.toBeDefined();
   });
 
   test('check regExp value', () => {
@@ -369,6 +411,7 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
+
   test('filter out properties that throw on stringification', () => {
     const thrower = {
       a: 'foo',
@@ -383,6 +426,7 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
+
   test('filter for forbidden objects', () => {
     const thrower = {
       a: 'foo',
