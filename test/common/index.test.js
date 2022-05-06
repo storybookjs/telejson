@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-shadow */
 import * as src from '../../src';
 import * as dist from '../../dist/cjs';
 
@@ -71,14 +73,18 @@ const tests = ({ stringify, parse }) => {
   test('stringify', () => {
     let stringified;
 
-    expect(() => (stringified = stringify(data))).not.toThrow();
+    expect(() => {
+      stringified = stringify(data);
+    }).not.toThrow();
     expect(stringified).toMatchSnapshot();
   });
 
   test('parse', () => {
     const stringified = stringify(data);
     let parsed;
-    expect(() => (parsed = parse(stringified))).not.toThrow();
+    expect(() => {
+      parsed = parse(stringified);
+    }).not.toThrow();
     expect(parsed).toMatchSnapshot();
 
     // test the regex
@@ -151,6 +157,18 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.foo instanceof Foo).toBe(false);
   });
 
+  test('NOT check constructor value when disabled via options in parse', () => {
+    const data = { ConstructorFruit: new Foo() };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified, { allowFunction: false });
+
+    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
+    expect(parsed.ConstructorFruit).toBeDefined();
+    expect(parsed.ConstructorFruit.constructor.name).toBe('Object');
+    expect(parsed.ConstructorFruit).toEqual({ '_constructor-name_': 'Foo' });
+  });
+
   test('check function value', () => {
     const Fruit = function (value) {
       return [value, 'apple'];
@@ -167,6 +185,36 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.FunctionFruit.toString()).toEqual(
       "function Fruit(value) {return [value, 'apple'];}"
     );
+  });
+
+  test('NOT check function value when disabled via options in parse', () => {
+    const Fruit = function (value) {
+      return [value, 'apple'];
+    };
+    const data = { FunctionFruit: Fruit };
+
+    const stringified = stringify(data);
+    const parsed = parse(stringified, { allowFunction: false });
+
+    expect(stringified).toEqual(
+      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
+    );
+    expect(parsed.FunctionFruit).toEqual(
+      "_function_Fruit|function Fruit(value) {return [value, 'apple'];}"
+    );
+  });
+
+  test('NOT check function value when disabled via options in stringify', () => {
+    const Fruit = function (value) {
+      return [value, 'apple'];
+    };
+    const data = { FunctionFruit: Fruit };
+
+    const stringified = stringify(data, { allowFunction: false });
+    const parsed = parse(stringified);
+
+    expect(stringified).toEqual('{}');
+    expect(parsed.FunctionFruit).not.toBeDefined();
   });
 
   test('check regExp value', () => {
@@ -349,6 +397,52 @@ const tests = ({ stringify, parse }) => {
     const parsed = parse(stringified);
 
     expect(parsed['foo.b'].constructor.name).toEqual('Foo');
+  });
+
+  test('filter out properties that throw on access', () => {
+    const thrower = {
+      a: 'foo',
+      get b() {
+        throw new Error('b is not allowed!');
+      },
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
+  });
+
+  test('filter out properties that throw on stringification', () => {
+    const thrower = {
+      a: 'foo',
+      b: {
+        get toJSON() {
+          throw new Error('b.toJSON is not allowed!');
+        },
+      },
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
+  });
+
+  test('filter for forbidden objects', () => {
+    const thrower = {
+      a: 'foo',
+      b: new Proxy(
+        {},
+        {
+          get() {
+            throw new Error('properties on b are not allowed!');
+          },
+        }
+      ),
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
   });
 };
 

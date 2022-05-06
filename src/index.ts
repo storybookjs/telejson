@@ -104,18 +104,40 @@ export interface Options {
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 function convertUnconventionalData(data: unknown) {
+  if (!isObject(data)) {
+    return data;
+  }
+
+  let result: any = data;
+  let wasMutated = false;
+
   // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
   // Plus we need to check if running in a browser to ensure `Event` exist and
   // is really the dom Event class.
   if (isRunningInBrowser && data instanceof Event) {
-    return extractEventHiddenProperties(data);
+    result = extractEventHiddenProperties(result);
+    wasMutated = true;
   }
 
-  return data;
+  result = Object.keys(result).reduce((acc, key) => {
+    try {
+      // Try accessing a property to test if we are allowed to do so
+      // eslint-disable-next-line no-unused-expressions
+      result[key]?.toJSON;
+
+      acc[key] = result[key];
+    } catch (err) {
+      wasMutated = true;
+    }
+    return acc;
+  }, {} as any);
+
+  return wasMutated ? result : data;
 }
 
-export const replacer = function replacer(options: Options) {
+export const replacer = function replacer(options: Options): any {
   let objects: Map<any, string>;
+  let map: Map<any, any>;
   let stack: any[];
   let keys: string[];
 
@@ -125,13 +147,16 @@ export const replacer = function replacer(options: Options) {
       if (key === '') {
         keys = [];
         objects = new Map([[value, '[]']]);
+        map = new Map();
         stack = [];
+
         return value;
       }
 
       // From the JSON.stringify's doc:
       // "The object in which the key was found is provided as the replacer's this parameter." thus one can control the depth
-      while (stack.length && this !== stack[0]) {
+      const origin = map.get(this) || this;
+      while (stack.length && origin !== stack[0]) {
         stack.shift();
         keys.pop();
       }
@@ -145,6 +170,10 @@ export const replacer = function replacer(options: Options) {
           return undefined;
         }
         return '_undefined_';
+      }
+
+      if (value === null) {
+        return null;
       }
 
       if (typeof value === 'number') {
@@ -220,21 +249,34 @@ export const replacer = function replacer(options: Options) {
         return '[Object]';
       }
 
+      if (value === this) {
+        return `_duplicate_${JSON.stringify(keys)}`;
+      }
+
+      // when it's a class and we don't want to support classes, skip
+      if (
+        value.constructor &&
+        value.constructor.name &&
+        value.constructor.name !== 'Object' &&
+        !Array.isArray(value) &&
+        !options.allowClass
+      ) {
+        return undefined;
+      }
+
       const found = objects.get(value);
       if (!found) {
+        const converted = Array.isArray(value) ? value : convertUnconventionalData(value);
+
         if (
-          value &&
-          isObject(value) &&
           value.constructor &&
           value.constructor.name &&
-          value.constructor.name !== 'Object'
+          value.constructor.name !== 'Object' &&
+          !Array.isArray(value) &&
+          options.allowClass
         ) {
-          if (!options.allowClass) {
-            return undefined;
-          }
-
           try {
-            Object.assign(value, { '_constructor-name_': value.constructor.name });
+            Object.assign(converted, { '_constructor-name_': value.constructor.name });
           } catch (e) {
             // immutable objects can't be written to and throw
             // we could make a deep copy but if the user values the correct instance name,
@@ -243,9 +285,14 @@ export const replacer = function replacer(options: Options) {
         }
 
         keys.push(key);
-        stack.unshift(value);
+        stack.unshift(converted);
         objects.set(value, JSON.stringify(keys));
-        return convertUnconventionalData(value);
+
+        if (value !== converted) {
+          map.set(value, converted);
+        }
+
+        return converted;
       }
 
       //  actually, here's the only place where the keys keeping is useful
@@ -261,7 +308,7 @@ interface ValueContainer {
   [keys: string]: any;
 }
 
-export const reviver = function reviver(options: Options) {
+export const reviver = function reviver(options: Options): any {
   const refs: { target: string; container: { [keys: string]: any }; replacement: string }[] = [];
   let root: any;
 
@@ -290,11 +337,11 @@ export const reviver = function reviver(options: Options) {
     }
 
     // deal with instance names
-    if (isObject<ValueContainer>(value) && value['_constructor-name_']) {
+    if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
         // eslint-disable-next-line no-new-func
-        const Fn = new Function(`return function ${name}(){}`)();
+        const Fn = new Function(`return function ${name.replace(/[\W_]+/g, '')}(){}`)();
         Object.setPrototypeOf(value, new Fn());
       }
       // eslint-disable-next-line no-param-reassign
@@ -302,7 +349,7 @@ export const reviver = function reviver(options: Options) {
       return value;
     }
 
-    if (typeof value === 'string' && value.startsWith('_function_')) {
+    if (typeof value === 'string' && value.startsWith('_function_') && options.allowFunction) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
       // eslint-disable-next-line no-useless-escape
       const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
@@ -327,13 +374,13 @@ export const reviver = function reviver(options: Options) {
       return result;
     }
 
-    if (typeof value === 'string' && value.startsWith('_regexp_')) {
+    if (typeof value === 'string' && value.startsWith('_regexp_') && options.allowRegExp) {
       // this split isn't working correctly
       const [, flags, source] = value.match(/_regexp_([^|]*)\|(.*)/) || [];
       return new RegExp(source, flags);
     }
 
-    if (typeof value === 'string' && value.startsWith('_date_')) {
+    if (typeof value === 'string' && value.startsWith('_date_') && options.allowDate) {
       return new Date(value.replace('_date_', ''));
     }
 
@@ -342,11 +389,11 @@ export const reviver = function reviver(options: Options) {
       return null;
     }
 
-    if (typeof value === 'string' && value.startsWith('_symbol_')) {
+    if (typeof value === 'string' && value.startsWith('_symbol_') && options.allowSymbol) {
       return Symbol(value.replace('_symbol_', ''));
     }
 
-    if (typeof value === 'string' && value.startsWith('_gsymbol_')) {
+    if (typeof value === 'string' && value.startsWith('_gsymbol_') && options.allowSymbol) {
       return Symbol.for(value.replace('_gsymbol_', ''));
     }
 
