@@ -383,6 +383,23 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
+  test('filter for forbidden objects', () => {
+    const thrower = {
+      a: 'foo',
+      b: new Proxy(
+        {},
+        {
+          get() {
+            throw new Error('properties on b are not allowed!');
+          },
+        }
+      ),
+    };
+    const stringified = stringify(thrower);
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({ a: 'foo' });
+  });
 };
 
 describe('Source', () => {
