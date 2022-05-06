@@ -26,14 +26,14 @@
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "types": "dist/types/index.d.ts",
-  "module": "dist/esm/index.js",
+  "module": "dist/esm/index.mjs",
   "exports": {
-    "import": "./dist/esm/index.js",
+    "import": "./dist/esm/index.mjs",
     "require": "./dist/cjs/index.js"
   },
   "scripts": {
     "build:cjs": "babel src --out-dir dist/cjs --extensions \".ts\"",
-    "build:esm": "BABEL_ESM=true babel src --out-dir dist/esm --extensions \".ts\"",
+    "build:esm": "BABEL_ESM=true babel src --out-dir dist/esm --extensions \".ts\" --out-file-extension \".mjs\"",
     "build:tsc": "tsc --emitDeclarationOnly",
     "build": "yarn build:cjs && yarn build:esm && yarn build:tsc",
     "lint": "eslint src --ext .js,.ts",
