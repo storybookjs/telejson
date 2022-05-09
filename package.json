@@ -53,12 +53,13 @@
   "jest": {},
   "dependencies": {
     "@types/is-function": "^1.0.0",
+    "@types/lodash.get": "^4.4.7",
     "global": "^4.4.0",
     "is-function": "^1.0.2",
     "is-regex": "^1.1.2",
     "is-symbol": "^1.0.3",
     "isobject": "^4.0.0",
-    "lodash": "^4.17.21",
+    "lodash.get": "^4.4.2",
     "memoizerific": "^1.11.3"
   },
   "devDependencies": {
@@ -68,7 +69,6 @@
     "@babel/preset-typescript": "^7.13.0",
     "@storybook/eslint-config-storybook": "^3.0.0",
     "@types/jest": "^26.0.22",
-    "@types/lodash": "^4.14.168",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^26.6.3",
     "common-tags": "^1.8.0",
