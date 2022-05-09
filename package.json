@@ -20,22 +20,19 @@
     "type": "git",
     "url": "https://github.com/storybookjs/telejson.git"
   },
+  "license": "MIT",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/*"
   ],
-  "license": "MIT",
-  "main": "dist/cjs/index.js",
-  "types": "dist/types/index.d.ts",
-  "module": "dist/esm/index.mjs",
-  "exports": {
-    "import": "./dist/esm/index.mjs",
-    "require": "./dist/cjs/index.js"
-  },
   "scripts": {
-    "build:cjs": "babel src --out-dir dist/cjs --extensions \".ts\"",
-    "build:esm": "BABEL_ESM=true babel src --out-dir dist/esm --extensions \".ts\" --out-file-extension \".mjs\"",
-    "build:tsc": "tsc --emitDeclarationOnly",
-    "build": "yarn build:cjs && yarn build:esm && yarn build:tsc",
+    "build": "tsup",
     "lint": "eslint src --ext .js,.ts",
     "prepublish": "yarn build",
     "test": "yarn test-node && yarn test-browser",
@@ -43,12 +40,13 @@
     "test-node": "TZ=UTC jest --env=node ./common ./node"
   },
   "eslintConfig": {
+    "env": {
+      "browser": true
+    },
     "extends": [
       "@storybook/eslint-config-storybook"
     ],
-    "env": {
-      "browser": true
-    }
+    "ignorePatterns": ["dist/*"]
   },
   "jest": {},
   "dependencies": {
@@ -76,9 +74,22 @@
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "regenerator-runtime": "^0.13.7",
+    "tsup": "^5.12.7",
     "typescript": "^4.2.3"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "format": [
+      "esm",
+      "cjs"
+    ],
+    "sourcemap": true,
+    "clean": true,
+    "dts": true
   }
 }

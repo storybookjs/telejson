@@ -1,5 +1,6 @@
 import * as src from '../../src';
-import * as dist from '../../dist/cjs';
+// eslint-disable-next-line import/extensions
+import * as dist from '../../dist/index.js';
 
 const tests = ({ stringify, parse }) => {
   test('HTML Event', () => {

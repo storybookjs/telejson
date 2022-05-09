@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-shadow */
 import * as src from '../../src';
-import * as dist from '../../dist/cjs';
+// eslint-disable-next-line import/extensions
+import * as dist from '../../dist/index.js';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
