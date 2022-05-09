@@ -124,7 +124,7 @@ function convertUnconventionalData(data: unknown) {
     try {
       // Try accessing a property to test if we are allowed to do so
       // eslint-disable-next-line no-unused-expressions
-      result[key]?.toJSON;
+      result[key] && result[key].toJSON;
 
       acc[key] = result[key];
     } catch (err) {
