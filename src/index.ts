@@ -2,8 +2,7 @@ import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash.get';
+import get from 'lodash/get';
 import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 
@@ -124,7 +123,7 @@ function convertUnconventionalData(data: unknown) {
     try {
       // Try accessing a property to test if we are allowed to do so
       // eslint-disable-next-line no-unused-expressions
-      result[key] && result[key].toJSON;
+      result[key]?.toJSON;
 
       acc[key] = result[key];
     } catch (err) {

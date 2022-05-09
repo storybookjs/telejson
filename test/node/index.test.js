@@ -1,6 +1,5 @@
 import * as src from '../../src';
-// eslint-disable-next-line import/extensions
-import * as dist from '../../dist/index.js';
+import * as dist from '../../dist/cjs';
 
 const tests = ({ stringify }) => {
   test('stringify the global object', () => {
