@@ -44,6 +44,9 @@
     ],
     "env": {
       "browser": true
+    },
+    "parserOptions": {
+      "project": "./tsconfig.json"
     }
   },
   "jest": {},
@@ -60,7 +63,7 @@
     "tsup": "^6.2.2",
     "@babel/preset-typescript": "^7.18.6",
     "@babel/preset-env": "^7.20.0",
-    "@storybook/eslint-config-storybook": "^3.0.0",
+    "@storybook/eslint-config-storybook": "^3.1.2",
     "@types/jest": "^26.0.22",
     "@types/lodash-es": "^4.17.6",
     "babel-core": "7.0.0-bridge.0",

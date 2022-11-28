@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable import/no-extraneous-dependencies */
 import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
@@ -120,7 +122,7 @@ function convertUnconventionalData(data: unknown) {
   result = Object.keys(result).reduce((acc, key) => {
     try {
       // Try accessing a property to test if we are allowed to do so
-      // eslint-disable-next-line no-unused-expressions
+      // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
       result[key]?.toJSON;
 
       acc[key] = result[key];
@@ -338,7 +340,7 @@ export const reviver = function reviver(options: Options): any {
     if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
-        // eslint-disable-next-line no-new-func
+        // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
         const Fn = new Function(`return function ${name.replace(/[\W_]+/g, '')}(){}`)();
         Object.setPrototypeOf(value, new Fn());
       }

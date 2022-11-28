@@ -1268,14 +1268,14 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@storybook/eslint-config-storybook@^3.0.0":
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/@storybook/eslint-config-storybook/-/eslint-config-storybook-3.1.2.tgz#835448a0fff2281f37dc268b556d2d42039884d8"
-  integrity sha512-7NB6tMKTxgX1GgqqYvgToeqSyGKKksFjUJ/P8Ui7C2XdnEdp9YLCWuuUpCm6ZpA5YGVxFFjCS58pcPG4J7HQ0A==
+"@storybook/eslint-config-storybook@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/eslint-config-storybook/-/eslint-config-storybook-3.0.0.tgz#fdcfb437bf689b08d6c968a52478e1b6e4f3b273"
+  integrity sha512-6JL84IC/WBVzE+Gjf94xkXYJtkQjf5OqGgvqqotvM4FUzIHt/KIzOgixgCHbdOCiac8zzJn+PqwFZpEX2ycyDw==
   dependencies:
-    "@storybook/linter-config" "3.1.2"
+    "@storybook/linter-config" "^3.0.0"
 
-"@storybook/linter-config@3.1.2":
+"@storybook/linter-config@^3.0.0":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@storybook/linter-config/-/linter-config-3.1.2.tgz#62391b967503c7c6ef56998aa1fed64db2038a8f"
   integrity sha512-2Ek2tNS77hNbaz+24ZJEAOatyoU9RY+JXgPOR9Zp347fRTfaAhW5c4uithzl3n4VFF5RmlHjbhZdhn0PZw++wQ==
