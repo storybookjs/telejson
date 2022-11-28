@@ -1,5 +1,4 @@
-import * as src from '../../src';
-import * as dist from '../../dist/cjs';
+import * as dist from '../../dist/index.js';
 
 const tests = ({ stringify, parse }) => {
   test('HTML Event', () => {
@@ -71,10 +70,6 @@ const tests = ({ stringify, parse }) => {
     });
   });
 };
-
-describe('Source', () => {
-  tests(src);
-});
 
 describe('Dist', () => {
   tests(dist);

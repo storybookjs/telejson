@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-shadow */
-import * as src from '../../src';
-import * as dist from '../../dist/cjs';
+import * as dist from '../../dist/index.js';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
@@ -170,7 +169,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('check function value', () => {
-    const Fruit = function (value) {
+    const Fruit = function Fruit(value) {
       return [value, 'apple'];
     };
     const data = { FunctionFruit: Fruit };
@@ -188,7 +187,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('NOT check function value when disabled via options in parse', () => {
-    const Fruit = function (value) {
+    const Fruit = function Fruit(value) {
       return [value, 'apple'];
     };
     const data = { FunctionFruit: Fruit };
@@ -205,7 +204,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('NOT check function value when disabled via options in stringify', () => {
-    const Fruit = function (value) {
+    const Fruit = function Fruit(value) {
       return [value, 'apple'];
     };
     const data = { FunctionFruit: Fruit };
@@ -344,9 +343,6 @@ const tests = ({ stringify, parse }) => {
       b: '2',
       c: NaN,
       d: true,
-      e: {
-        1: data,
-      },
       f: [1, 2, 3, 4, 5],
       g: undefined,
       h: null,
@@ -354,9 +350,13 @@ const tests = ({ stringify, parse }) => {
       j() {},
     };
 
+    data.e = {
+      1: data,
+    };
+
     const stringified = stringify(data);
-    expect(stringified).toMatch(
-      '{"a":1,"b":"2","c":"_NaN_","d":true,"e":{"1":"_undefined_"},"f":[1,2,3,4,5],"g":"_undefined_","h":null,"i":"_function_i|function i() {}","j":"_function_j|function j() {}"}'
+    expect(stringified).toMatchInlineSnapshot(
+      `"{\\"a\\":1,\\"b\\":\\"2\\",\\"c\\":\\"_NaN_\\",\\"d\\":true,\\"f\\":[1,2,3,4,5],\\"g\\":\\"_undefined_\\",\\"h\\":null,\\"i\\":\\"_function_i|() => {}\\",\\"j\\":\\"_function_j|function() {}\\",\\"e\\":{\\"1\\":\\"_duplicate_[]\\"}}"`
     );
 
     const parsed = parse(stringified);
@@ -445,10 +445,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 };
-
-describe('Source', () => {
-  tests(src);
-});
 
 describe('Dist', () => {
   tests(dist);
