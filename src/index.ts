@@ -65,7 +65,7 @@ const cleanCode = memoize(10000)((code: string) =>
     .trim()
 );
 
-const convertShorthandMethods = function (key: string, stringified: string) {
+const convertShorthandMethods = function convertShorthandMethods(key: string, stringified: string) {
   const fnHead = stringified.slice(0, stringified.indexOf('{'));
   const fnBody = stringified.slice(stringified.indexOf('{'));
 
