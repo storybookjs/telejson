@@ -19,13 +19,8 @@ export default defineConfig([
       entry,
     },
     esbuildOptions(options, context) {
-      options.platform = 'node';
+      options.platform = 'browser';
       options.logLevel = 'silent'
-      options.banner = {
-        js:
-          "import { createRequire as topLevelCreateRequire } from 'module';\n const require = topLevelCreateRequire(import" +
-          '.meta.url);',
-      };
     },
   },
 ]);
