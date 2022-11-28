@@ -1,4 +1,3 @@
-import * as src from '../../src';
 import * as dist from '../../dist/index.js';
 
 const tests = ({ stringify, parse }) => {
@@ -71,10 +70,6 @@ const tests = ({ stringify, parse }) => {
     });
   });
 };
-
-describe('Source', () => {
-  tests(src);
-});
 
 describe('Dist', () => {
   tests(dist);

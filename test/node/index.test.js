@@ -1,4 +1,3 @@
-import * as src from '../../src';
 import * as dist from '../../dist/index';
 
 const tests = ({ stringify }) => {
@@ -6,10 +5,6 @@ const tests = ({ stringify }) => {
     expect(() => stringify(global, { maxDepth: 10000 })).not.toThrow();
   });
 };
-
-describe('Source', () => {
-  tests(src);
-});
 
 describe('Dist', () => {
   tests(dist);

@@ -2,7 +2,7 @@ import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
-import get from 'lodash/get';
+import { get } from 'lodash-es';
 import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 

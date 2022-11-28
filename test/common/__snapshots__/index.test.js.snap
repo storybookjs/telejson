@@ -62,10 +62,10 @@ exports[`Dist space 1`] = `
   \\"regex1\\": \\"_regexp_|foo\\",
   \\"regex2\\": \\"_regexp_g|foo\\",
   \\"regex3\\": \\"_regexp_i|foo\\",
-  \\"fn1\\": \\"_function_fn1|function fn1(x) {return x + x;}\\",
+  \\"fn1\\": \\"_function_fn1|x => x + x\\",
   \\"fn2\\": \\"_function_x|function x(x) {return x - x;}\\",
   \\"fn3\\": \\"_function_fn3|function fn3() {return x / x;}\\",
-  \\"fn4\\": \\"_function_fn4|function fn4(x) {return x * x;}\\",
+  \\"fn4\\": \\"_function_fn4|function(x) {return x * x;}\\",
   \\"date\\": \\"_date_2018-01-01T00:00:00.000Z\\",
   \\"foo\\": {
     \\"_constructor-name_\\": \\"Foo\\"
@@ -96,102 +96,4 @@ exports[`Dist space 1`] = `
 }"
 `;
 
-exports[`Dist stringify 1`] = `"{\\"regex1\\":\\"_regexp_|foo\\",\\"regex2\\":\\"_regexp_g|foo\\",\\"regex3\\":\\"_regexp_i|foo\\",\\"fn1\\":\\"_function_fn1|function fn1(x) {return x + x;}\\",\\"fn2\\":\\"_function_x|function x(x) {return x - x;}\\",\\"fn3\\":\\"_function_fn3|function fn3() {return x / x;}\\",\\"fn4\\":\\"_function_fn4|function fn4(x) {return x * x;}\\",\\"date\\":\\"_date_2018-01-01T00:00:00.000Z\\",\\"foo\\":{\\"_constructor-name_\\":\\"Foo\\"},\\"nested\\":{\\"a\\":{\\"b\\":{\\"c\\":{\\"d\\":{\\"e\\":{\\"f\\":{\\"g\\":{\\"h\\":{\\"i\\":{\\"j\\":\\"[Object]\\"}}}}}}}}}},\\"undef\\":\\"_undefined_\\",\\"cyclic\\":\\"_duplicate_[]\\"}"`;
-
-exports[`Source nested arrays 1`] = `
-Object {
-  "event": Object {
-    "args": Array [
-      Object {
-        "argNames": undefined,
-        "options": Object {
-          "target": "storybook-preview-iframe",
-        },
-        "storyId": "addons-controls--basic",
-      },
-    ],
-    "from": "ca341e9487ddc",
-    "type": "resetStoryArgs",
-  },
-  "key": "storybook-channel",
-  "refId": undefined,
-}
-`;
-
-exports[`Source parse 1`] = `
-Object {
-  "cyclic": [Circular],
-  "date": 2018-01-01T00:00:00.000Z,
-  "fn1": [Function],
-  "fn2": [Function],
-  "fn3": [Function],
-  "fn4": [Function],
-  "foo": Foo {},
-  "nested": Object {
-    "a": Object {
-      "b": Object {
-        "c": Object {
-          "d": Object {
-            "e": Object {
-              "f": Object {
-                "g": Object {
-                  "h": Object {
-                    "i": Object {
-                      "j": "[Object]",
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-  "regex1": /foo/,
-  "regex2": /foo/g,
-  "regex3": /foo/i,
-  "undef": undefined,
-}
-`;
-
-exports[`Source space 1`] = `
-"{
-  \\"regex1\\": \\"_regexp_|foo\\",
-  \\"regex2\\": \\"_regexp_g|foo\\",
-  \\"regex3\\": \\"_regexp_i|foo\\",
-  \\"fn1\\": \\"_function_fn1|function fn1(x) {return x + x;}\\",
-  \\"fn2\\": \\"_function_x|function x(x) {return x - x;}\\",
-  \\"fn3\\": \\"_function_fn3|function fn3() {return x / x;}\\",
-  \\"fn4\\": \\"_function_fn4|function fn4(x) {return x * x;}\\",
-  \\"date\\": \\"_date_2018-01-01T00:00:00.000Z\\",
-  \\"foo\\": {
-    \\"_constructor-name_\\": \\"Foo\\"
-  },
-  \\"nested\\": {
-    \\"a\\": {
-      \\"b\\": {
-        \\"c\\": {
-          \\"d\\": {
-            \\"e\\": {
-              \\"f\\": {
-                \\"g\\": {
-                  \\"h\\": {
-                    \\"i\\": {
-                      \\"j\\": \\"[Object]\\"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  \\"undef\\": \\"_undefined_\\",
-  \\"cyclic\\": \\"_duplicate_[]\\"
-}"
-`;
-
-exports[`Source stringify 1`] = `"{\\"regex1\\":\\"_regexp_|foo\\",\\"regex2\\":\\"_regexp_g|foo\\",\\"regex3\\":\\"_regexp_i|foo\\",\\"fn1\\":\\"_function_fn1|function fn1(x) {return x + x;}\\",\\"fn2\\":\\"_function_x|function x(x) {return x - x;}\\",\\"fn3\\":\\"_function_fn3|function fn3() {return x / x;}\\",\\"fn4\\":\\"_function_fn4|function fn4(x) {return x * x;}\\",\\"date\\":\\"_date_2018-01-01T00:00:00.000Z\\",\\"foo\\":{\\"_constructor-name_\\":\\"Foo\\"},\\"nested\\":{\\"a\\":{\\"b\\":{\\"c\\":{\\"d\\":{\\"e\\":{\\"f\\":{\\"g\\":{\\"h\\":{\\"i\\":{\\"j\\":\\"[Object]\\"}}}}}}}}}},\\"undef\\":\\"_undefined_\\",\\"cyclic\\":\\"_duplicate_[]\\"}"`;
+exports[`Dist stringify 1`] = `"{\\"regex1\\":\\"_regexp_|foo\\",\\"regex2\\":\\"_regexp_g|foo\\",\\"regex3\\":\\"_regexp_i|foo\\",\\"fn1\\":\\"_function_fn1|x => x + x\\",\\"fn2\\":\\"_function_x|function x(x) {return x - x;}\\",\\"fn3\\":\\"_function_fn3|function fn3() {return x / x;}\\",\\"fn4\\":\\"_function_fn4|function(x) {return x * x;}\\",\\"date\\":\\"_date_2018-01-01T00:00:00.000Z\\",\\"foo\\":{\\"_constructor-name_\\":\\"Foo\\"},\\"nested\\":{\\"a\\":{\\"b\\":{\\"c\\":{\\"d\\":{\\"e\\":{\\"f\\":{\\"g\\":{\\"h\\":{\\"i\\":{\\"j\\":\\"[Object]\\"}}}}}}}}}},\\"undef\\":\\"_undefined_\\",\\"cyclic\\":\\"_duplicate_[]\\"}"`;
