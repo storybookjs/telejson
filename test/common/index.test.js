@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-shadow */
 import * as src from '../../src';
-import * as dist from '../../dist/cjs';
+import * as dist from '../../dist/index.js';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
@@ -15,7 +15,7 @@ function fn3() {
   return x / x;
 }
 
-class Foo {}
+class Foo { }
 
 const date = new Date('2018');
 
@@ -350,8 +350,8 @@ const tests = ({ stringify, parse }) => {
       f: [1, 2, 3, 4, 5],
       g: undefined,
       h: null,
-      i: () => {},
-      j() {},
+      i: () => { },
+      j() { },
     };
 
     const stringified = stringify(data);
@@ -386,8 +386,8 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('dots in keys', () => {
-    class Foo {}
-    class Bar {}
+    class Foo { }
+    class Bar { }
     const foo = new Foo();
     const bar = new Bar();
     const data = { 'foo.a': bar, foo: { a: foo }, 'foo.b': foo };

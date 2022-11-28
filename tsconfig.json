@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "lib": [
-      "es2015",
-      "es2017",
       "dom",
-      "es2020.bigint"
+      "es2020"
     ],
     "module": "commonjs",
     "declaration": true,
@@ -13,9 +11,15 @@
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "types": ["jest"],
-    "outDir": "dist/types"
+    "types": [
+      "jest"
+    ],
+    "outDir": "dist"
   },
-  "include": ["src"],
-  "exclude": ["dist"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }
