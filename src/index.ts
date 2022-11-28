@@ -6,8 +6,6 @@ import get from 'lodash/get';
 import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 
-const isRunningInBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-
 // eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
@@ -114,7 +112,7 @@ function convertUnconventionalData(data: unknown) {
   // `Event` has a weird structure, for details see `extractEventHiddenProperties` doc
   // Plus we need to check if running in a browser to ensure `Event` exist and
   // is really the dom Event class.
-  if (isRunningInBrowser && data instanceof Event) {
+  if (typeof Event !== 'undefined' && data instanceof Event) {
     result = extractEventHiddenProperties(result);
     wasMutated = true;
   }
