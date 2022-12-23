@@ -20,7 +20,7 @@ yarn add telejson
 
 Also JSON doesn't support cyclic data structures.
 
-This library allows you to pass in data with all all the above properties.
+This library allows you to pass in data with all of the above properties.
 It will transform the properties to something that's allowed by the JSON spec whilst stringifying,
 and then convert back to the cyclic data structure when parsing.
 
