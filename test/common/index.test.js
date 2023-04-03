@@ -444,6 +444,17 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toEqual({ a: 'foo' });
   });
+
+  test('parcel example', () => {
+    class $123Class {}
+
+    const example = new $123Class();
+
+    const stringified = stringify({ example });
+    const parsed = parse(stringified);
+
+    expect(parsed).toEqual({example: {}});
+  })
 };
 
 describe('Dist', () => {

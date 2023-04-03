@@ -344,7 +344,7 @@ export const reviver = function reviver(options: Options): any {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
         // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
-        const Fn = new Function(`return function ${name.replace(/[\W_]+/g, '')}(){}`)();
+        const Fn = new Function(`return function ${name.replace(/[^a-zA-Z0-9$_]+/g, '')}(){}`)();
         Object.setPrototypeOf(value, new Fn());
       }
       // eslint-disable-next-line no-param-reassign
