@@ -95,6 +95,7 @@ export interface Options {
   allowDate: boolean;
   allowUndefined: boolean;
   allowClass: boolean;
+  allowError: boolean;
   maxDepth: number;
   space: number | undefined;
   lazyEval: boolean;
@@ -256,6 +257,21 @@ export const replacer = function replacer(options: Options): any {
         return `_duplicate_${JSON.stringify(keys)}`;
       }
 
+      if (value instanceof Error && options.allowError) {
+        return {
+          __isConvertedError__: true,
+          errorProperties: {
+            // @ts-expect-error cause is not defined in the current tsconfig target(es2020)
+            ...(value.cause ? { cause: value.cause } : {}),
+            ...value,
+            name: value.name,
+            message: value.message,
+            stack: value.stack,
+            '_constructor-name_': value.constructor.name,
+          },
+        };
+      }
+
       // when it's a class and we don't want to support classes, skip
       if (
         value.constructor &&
@@ -337,6 +353,16 @@ export const reviver = function reviver(options: Options): any {
 
     if (key === '_constructor-name_') {
       return value;
+    }
+
+    // eslint-disable-next-line no-underscore-dangle
+    if (isObject<ValueContainer>(value) && value.__isConvertedError__) {
+      // reconstruct the error with its original properties
+      const { message, ...properties } = value.errorProperties;
+      const error = new Error(message);
+      Object.assign(error, properties);
+
+      return error;
     }
 
     // deal with instance names
@@ -427,6 +453,7 @@ const defaultOptions: Options = {
   allowRegExp: true,
   allowDate: true,
   allowClass: true,
+  allowError: true,
   allowUndefined: true,
   allowSymbol: true,
   lazyEval: true,
