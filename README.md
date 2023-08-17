@@ -16,6 +16,7 @@ yarn add telejson
 - Function
 - Class
 - Symbol
+- Error
 - etc.
 
 Also JSON doesn't support cyclic data structures.
@@ -115,6 +116,8 @@ Only relevant when using `stringify`.
 `allowRegExp`: When set to false, regular expressions will not be serialized. (default = true)
 
 `allowClass`: When set to false, class instances will not be serialized. (default = true)
+
+`allowError`: When set to false, error instances will not be serialized. (default = true)
 
 `allowDate`: When set to false, Date objects will not be serialized. (default = true)
 

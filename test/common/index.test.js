@@ -14,7 +14,20 @@ function fn3() {
   return x / x;
 }
 
-class Foo {}
+class Foo { }
+
+class SomeError extends Error {
+  aCustomProperty = true;
+  stack = 'mocked stack to avoid inconsistent snapshots';
+
+  constructor() {
+    super('Custom error message', { cause: { code: '001' } });
+  }
+
+  get name() {
+    return 'SomeError';
+  }
+}
 
 const date = new Date('2018');
 
@@ -58,6 +71,7 @@ const data = {
   },
   date,
   foo: new Foo(),
+  error: new SomeError(),
   nested,
   undef,
 };
@@ -104,6 +118,15 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.foo).toBeDefined();
     expect(parsed.foo.constructor.name).toBe('Foo');
     expect(parsed.foo instanceof Foo).toBe(false);
+
+    // test Error instance
+    expect(parsed.error).toBeDefined();
+    expect(parsed.error.message).toEqual('Custom error message');
+    expect(parsed.error.name).toEqual('SomeError');
+    expect(parsed.error.stack).toEqual(data.error.stack);
+    expect(parsed.error.cause).toEqual(data.error.cause);
+    expect(parsed.error.aCustomProperty).toEqual(data.error.aCustomProperty);
+    expect(parsed.error instanceof Error).toBe(true);
 
     expect(parsed.undef).toBeUndefined();
   });
@@ -346,8 +369,8 @@ const tests = ({ stringify, parse }) => {
       f: [1, 2, 3, 4, 5],
       g: undefined,
       h: null,
-      i: () => {},
-      j() {},
+      i: () => { },
+      j() { },
     };
 
     data.e = {
@@ -386,8 +409,8 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('dots in keys', () => {
-    class Foo {}
-    class Bar {}
+    class Foo { }
+    class Bar { }
     const foo = new Foo();
     const bar = new Bar();
     const data = { 'foo.a': bar, foo: { a: foo }, 'foo.b': foo };
@@ -446,15 +469,15 @@ const tests = ({ stringify, parse }) => {
   });
 
   test('parcel example', () => {
-    class $123Class {}
+    class $123Class { }
 
     const example = new $123Class();
 
     const stringified = stringify({ example });
     const parsed = parse(stringified);
 
-    expect(parsed).toEqual({example: {}});
-  })
+    expect(parsed).toEqual({ example: {} });
+  });
 };
 
 describe('Dist', () => {
