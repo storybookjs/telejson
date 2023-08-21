@@ -143,6 +143,14 @@ All contributions are welcome!
 
 ### run tests:
 
+first, build the package:
+
+```sh
+yarn build
+```
+
+then run the tests:
+
 ```sh
 yarn test
 ```
