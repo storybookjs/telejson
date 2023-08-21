@@ -21,6 +21,7 @@
     "url": "https://github.com/storybookjs/telejson.git"
   },
   "license": "MIT",
+  "author": "ndelangen@me.com",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
