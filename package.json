@@ -22,11 +22,11 @@
     "lint": "biome lint .",
     "format": "biome format . --write",
     "check": "biome check --apply .",
-    "prepublish": "yarn build",
+    "prepublish": "pnpm run build",
     "test": "TZ=UTC vitest run",
     "test:watch": "TZ=UTC vitest",
     "test:coverage": "TZ=UTC vitest run --coverage",
-    "release": "yarn build && auto shipit"
+    "release": "pnpm run build && auto shipit"
   },
   "devDependencies": {
     "@auto-it/released": "^11.0.1",
