@@ -1,5 +1,3 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable import/no-extraneous-dependencies */
 import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
@@ -8,7 +6,6 @@ import { get } from 'lodash-es';
 import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 
-// eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
 const removeCodeComments = (code: string) => {
@@ -101,7 +98,6 @@ export interface Options {
   lazyEval: boolean;
 }
 
-// eslint-disable-next-line no-useless-escape
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 function convertUnconventionalData(data: unknown) {
@@ -125,12 +121,12 @@ function convertUnconventionalData(data: unknown) {
       // Try accessing a property to test if we are allowed to do so
       // We have a if statement, and not a optional chaining, because webpack4 doesn't support it, and react-native uses it
       if (result[key]) {
-        // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+        
         result[key].toJSON;
       }
 
       acc[key] = result[key];
-    } catch (err) {
+    } catch (_err) {
       wasMutated = true;
     }
     return acc;
@@ -181,10 +177,10 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (typeof value === 'number') {
-        if (value === -Infinity) {
+        if (value === Number.NEGATIVE_INFINITY) {
           return '_-Infinity_';
         }
-        if (value === Infinity) {
+        if (value === Number.POSITIVE_INFINITY) {
           return '_Infinity_';
         }
         if (Number.isNaN(value)) {
@@ -274,8 +270,7 @@ export const replacer = function replacer(options: Options): any {
 
       // when it's a class and we don't want to support classes, skip
       if (
-        value.constructor &&
-        value.constructor.name &&
+        value?.constructor?.name &&
         value.constructor.name !== 'Object' &&
         !Array.isArray(value) &&
         !options.allowClass
@@ -288,15 +283,14 @@ export const replacer = function replacer(options: Options): any {
         const converted = Array.isArray(value) ? value : convertUnconventionalData(value);
 
         if (
-          value.constructor &&
-          value.constructor.name &&
+          value?.constructor?.name &&
           value.constructor.name !== 'Object' &&
           !Array.isArray(value) &&
           options.allowClass
         ) {
           try {
             Object.assign(converted, { '_constructor-name_': value.constructor.name });
-          } catch (e) {
+          } catch (_e) {
             // immutable objects can't be written to and throw
             // we could make a deep copy but if the user values the correct instance name,
             // the user should make the deep copy themselves.
@@ -316,7 +310,7 @@ export const replacer = function replacer(options: Options): any {
 
       //  actually, here's the only place where the keys keeping is useful
       return `_duplicate_${found}`;
-    } catch (e) {
+    } catch (_e) {
       return undefined;
     }
   };
@@ -324,6 +318,7 @@ export const replacer = function replacer(options: Options): any {
 
 interface ValueContainer {
   '_constructor-name_'?: string;
+  
   [keys: string]: any;
 }
 
@@ -337,15 +332,16 @@ export const reviver = function reviver(options: Options): any {
       root = value;
 
       // restore cyclic refs
-      refs.forEach(({ target, container, replacement }) => {
+      // biome-ignore lint/complexity/noForEach: <explanation>
+            refs.forEach(({ target, container, replacement }) => {
         const replacementArr = isJSON(replacement)
           ? JSON.parse(replacement)
           : replacement.split('.');
         if (replacementArr.length === 0) {
-          // eslint-disable-next-line no-param-reassign
+          
           container[target] = root;
         } else {
-          // eslint-disable-next-line no-param-reassign
+          
           container[target] = get(root, replacementArr);
         }
       });
@@ -355,7 +351,7 @@ export const reviver = function reviver(options: Options): any {
       return value;
     }
 
-    // eslint-disable-next-line no-underscore-dangle
+    
     if (isObject<ValueContainer>(value) && value.__isConvertedError__) {
       // reconstruct the error with its original properties
       const { message, ...properties } = value.errorProperties;
@@ -369,28 +365,31 @@ export const reviver = function reviver(options: Options): any {
     if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
       const name = value['_constructor-name_'];
       if (name !== 'Object') {
-        // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
+        
         const Fn = new Function(`return function ${name.replace(/[^a-zA-Z0-9$_]+/g, '')}(){}`)();
         Object.setPrototypeOf(value, new Fn());
       }
-      // eslint-disable-next-line no-param-reassign
-      delete value['_constructor-name_'];
+      
+      // biome-ignore lint/performance/noDelete: <explanation>
+            delete value['_constructor-name_'];
       return value;
     }
 
     if (typeof value === 'string' && value.startsWith('_function_') && options.allowFunction) {
       const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
-      // eslint-disable-next-line no-useless-escape
+      
       const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
 
       if (!options.lazyEval) {
-        // eslint-disable-next-line no-eval
-        return eval(`(${sourceSanitized})`);
+        
+        // biome-ignore lint/security/noGlobalEval: <explanation>
+                return eval(`(${sourceSanitized})`);
       }
 
       // lazy eval of the function
       const result = (...args: any[]) => {
-        // eslint-disable-next-line no-eval
+        
+        // biome-ignore lint/security/noGlobalEval: <explanation>
         const f = eval(`(${sourceSanitized})`);
         return f(...args);
       };
@@ -427,15 +426,15 @@ export const reviver = function reviver(options: Options): any {
     }
 
     if (typeof value === 'string' && value === '_-Infinity_') {
-      return -Infinity;
+      return Number.NEGATIVE_INFINITY;
     }
 
     if (typeof value === 'string' && value === '_Infinity_') {
-      return Infinity;
+      return Number.POSITIVE_INFINITY;
     }
 
     if (typeof value === 'string' && value === '_NaN_') {
-      return NaN;
+      return Number.NaN;
     }
 
     if (typeof value === 'string' && value.startsWith('_bigint_') && typeof BigInt === 'function') {
@@ -471,9 +470,10 @@ const mutator = () => {
     // JSON.parse will not output keys with value of undefined
     // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
     if (isObject<{ [keys: string]: any }>(value)) {
+      // biome-ignore lint/complexity/noForEach: <explanation>
       Object.entries(value).forEach(([k, v]) => {
         if (v === '_undefined_') {
-          // eslint-disable-next-line no-param-reassign
+          
           value[k] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);
@@ -485,7 +485,7 @@ const mutator = () => {
       value.forEach((v, index) => {
         if (v === '_undefined_') {
           mutated.set(v, true);
-          // eslint-disable-next-line no-param-reassign
+          
           value[index] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);

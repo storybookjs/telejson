@@ -6,10 +6,10 @@ export default defineConfig([
   {
     entry,
     format: 'cjs',
-    
-    esbuildOptions(options, context) {
+
+    esbuildOptions(options) {
       options.platform = 'node';
-      options.logLevel = 'silent'
+      options.logLevel = 'silent';
     },
   },
   {
@@ -18,9 +18,9 @@ export default defineConfig([
     dts: {
       entry,
     },
-    esbuildOptions(options, context) {
+    esbuildOptions(options) {
       options.platform = 'browser';
-      options.logLevel = 'silent'
+      options.logLevel = 'silent';
     },
   },
 ]);

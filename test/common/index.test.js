@@ -1,13 +1,13 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-shadow */
 import { describe, it, expect } from 'vitest';
 import * as dist from '../../dist/index.js';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
+// biome-ignore lint/complexity/useRegexLiterals: <explanation>
 const regex3 = new RegExp('foo', 'i');
 
 const fn1 = (x) => x + x;
+// biome-ignore lint/suspicious/noRedeclare: <explanation>
 const fn2 = function x(x) {
   return x - x;
 };
@@ -292,7 +292,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   it('check minus Infinity value', () => {
-    const data = { InfinityFruit: -Infinity };
+    const data = { InfinityFruit: Number.NEGATIVE_INFINITY };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -302,7 +302,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   it('check Infinity value', () => {
-    const data = { InfinityFruit: Infinity };
+    const data = { InfinityFruit: Number.POSITIVE_INFINITY };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -312,7 +312,7 @@ const tests = ({ stringify, parse }) => {
   });
 
   it('check NaN value', () => {
-    const data = { NaNFruit: NaN };
+    const data = { NaNFruit: Number.NaN };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -374,7 +374,7 @@ const tests = ({ stringify, parse }) => {
     const data = {
       a: 1,
       b: '2',
-      c: NaN,
+      c: Number.NaN,
       d: true,
       f: [1, 2, 3, 4, 5],
       g: undefined,
@@ -394,7 +394,8 @@ const tests = ({ stringify, parse }) => {
 
     const parsed = parse(stringified);
 
-    Object.entries(parsed).forEach((k, v) => {
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    Object.entries(parsed).forEach((k) => {
       expect(data[k]).toEqual(parsed[k]);
     });
   });
