@@ -115,8 +115,6 @@ Only relevant when using `stringify`.
 
 `allowRegExp`: When set to false, regular expressions will not be serialized. (default = true)
 
-`allowClass`: When set to false, class instances will not be serialized. (default = true)
-
 `allowError`: When set to false, error instances will not be serialized. (default = true)
 
 `allowDate`: When set to false, Date objects will not be serialized. (default = true)
@@ -124,12 +122,6 @@ Only relevant when using `stringify`.
 `allowUndefined`: When set to false, `undefined` will not be serialized. (default = true)
 
 `allowSymbol`: When set to false, Symbols will not be serialized. (default = true)
-
-### reviver
-
-`lazyEval`: When set to false, lazy eval will be disabled. (default true)
-
-Note: disabling lazy eval will affect performance. Consider disabling it only if you truly need to.
 
 ## Requirements
 

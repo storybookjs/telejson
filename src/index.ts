@@ -17,7 +17,6 @@ export interface Options {
   allowError: boolean;
   maxDepth: number;
   space: number | undefined;
-  lazyEval: boolean;
 }
 
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
@@ -316,7 +315,6 @@ const defaultOptions: Options = {
   allowError: true,
   allowUndefined: true,
   allowSymbol: true,
-  lazyEval: true,
 };
 
 export const stringify = (data: unknown, options: Partial<Options> = {}) => {
