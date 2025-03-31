@@ -1,12 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Dist nested arrays 1`] = `
-Object {
-  "event": Object {
-    "args": Array [
-      Object {
+exports[`Dist > nested arrays 1`] = `
+{
+  "event": {
+    "args": [
+      {
         "argNames": undefined,
-        "options": Object {
+        "options": {
           "target": "storybook-preview-iframe",
         },
         "storyId": "addons-controls--basic",
@@ -20,8 +20,8 @@ Object {
 }
 `;
 
-exports[`Dist parse 1`] = `
-Object {
+exports[`Dist > parse 1`] = `
+{
   "cyclic": [Circular],
   "date": 2018-01-01T00:00:00.000Z,
   "error": [SomeError: Custom error message],
@@ -30,16 +30,16 @@ Object {
   "fn3": [Function],
   "fn4": [Function],
   "foo": Foo {},
-  "nested": Object {
-    "a": Object {
-      "b": Object {
-        "c": Object {
-          "d": Object {
-            "e": Object {
-              "f": Object {
-                "g": Object {
-                  "h": Object {
-                    "i": Object {
+  "nested": {
+    "a": {
+      "b": {
+        "c": {
+          "d": {
+            "e": {
+              "f": {
+                "g": {
+                  "h": {
+                    "i": {
                       "j": "[Object]",
                     },
                   },
@@ -58,43 +58,43 @@ Object {
 }
 `;
 
-exports[`Dist space 1`] = `
+exports[`Dist > space 1`] = `
 "{
-  \\"regex1\\": \\"_regexp_|foo\\",
-  \\"regex2\\": \\"_regexp_g|foo\\",
-  \\"regex3\\": \\"_regexp_i|foo\\",
-  \\"fn1\\": \\"_function_fn1|x => x + x\\",
-  \\"fn2\\": \\"_function_x|function x(x) {return x - x;}\\",
-  \\"fn3\\": \\"_function_fn3|function fn3() {return x / x;}\\",
-  \\"fn4\\": \\"_function_fn4|function(x) {return x * x;}\\",
-  \\"date\\": \\"_date_2018-01-01T00:00:00.000Z\\",
-  \\"foo\\": {
-    \\"_constructor-name_\\": \\"Foo\\"
+  "regex1": "_regexp_|foo",
+  "regex2": "_regexp_g|foo",
+  "regex3": "_regexp_i|foo",
+  "fn1": "_function_fn1|(x) => x + x",
+  "fn2": "_function_x|function x(x) {return x - x;}",
+  "fn3": "_function_fn3|function fn3() {return x / x;}",
+  "fn4": "_function_fn4|function(x) {return x * x;}",
+  "date": "_date_2018-01-01T00:00:00.000Z",
+  "foo": {
+    "_constructor-name_": "Foo"
   },
-  \\"error\\": {
-    \\"__isConvertedError__\\": true,
-    \\"errorProperties\\": {
-      \\"cause\\": {
-        \\"code\\": \\"001\\"
+  "error": {
+    "__isConvertedError__": true,
+    "errorProperties": {
+      "cause": {
+        "code": "001"
       },
-      \\"stack\\": \\"mocked stack to avoid inconsistent snapshots\\",
-      \\"aCustomProperty\\": true,
-      \\"name\\": \\"SomeError\\",
-      \\"message\\": \\"Custom error message\\",
-      \\"_constructor-name_\\": \\"SomeError\\"
+      "stack": "mocked stack to avoid inconsistent snapshots",
+      "aCustomProperty": true,
+      "name": "SomeError",
+      "message": "Custom error message",
+      "_constructor-name_": "SomeError"
     }
   },
-  \\"nested\\": {
-    \\"a\\": {
-      \\"b\\": {
-        \\"c\\": {
-          \\"d\\": {
-            \\"e\\": {
-              \\"f\\": {
-                \\"g\\": {
-                  \\"h\\": {
-                    \\"i\\": {
-                      \\"j\\": \\"[Object]\\"
+  "nested": {
+    "a": {
+      "b": {
+        "c": {
+          "d": {
+            "e": {
+              "f": {
+                "g": {
+                  "h": {
+                    "i": {
+                      "j": "[Object]"
                     }
                   }
                 }
@@ -105,9 +105,9 @@ exports[`Dist space 1`] = `
       }
     }
   },
-  \\"undef\\": \\"_undefined_\\",
-  \\"cyclic\\": \\"_duplicate_[]\\"
+  "undef": "_undefined_",
+  "cyclic": "_duplicate_[]"
 }"
 `;
 
-exports[`Dist stringify 1`] = `"{\\"regex1\\":\\"_regexp_|foo\\",\\"regex2\\":\\"_regexp_g|foo\\",\\"regex3\\":\\"_regexp_i|foo\\",\\"fn1\\":\\"_function_fn1|x => x + x\\",\\"fn2\\":\\"_function_x|function x(x) {return x - x;}\\",\\"fn3\\":\\"_function_fn3|function fn3() {return x / x;}\\",\\"fn4\\":\\"_function_fn4|function(x) {return x * x;}\\",\\"date\\":\\"_date_2018-01-01T00:00:00.000Z\\",\\"foo\\":{\\"_constructor-name_\\":\\"Foo\\"},\\"error\\":{\\"__isConvertedError__\\":true,\\"errorProperties\\":{\\"cause\\":{\\"code\\":\\"001\\"},\\"stack\\":\\"mocked stack to avoid inconsistent snapshots\\",\\"aCustomProperty\\":true,\\"name\\":\\"SomeError\\",\\"message\\":\\"Custom error message\\",\\"_constructor-name_\\":\\"SomeError\\"}},\\"nested\\":{\\"a\\":{\\"b\\":{\\"c\\":{\\"d\\":{\\"e\\":{\\"f\\":{\\"g\\":{\\"h\\":{\\"i\\":{\\"j\\":\\"[Object]\\"}}}}}}}}}},\\"undef\\":\\"_undefined_\\",\\"cyclic\\":\\"_duplicate_[]\\"}"`;
+exports[`Dist > stringify > should match snapshot 1`] = `"{"regex1":"_regexp_|foo","regex2":"_regexp_g|foo","regex3":"_regexp_i|foo","fn1":"_function_fn1|(x) => x + x","fn2":"_function_x|function x(x) {return x - x;}","fn3":"_function_fn3|function fn3() {return x / x;}","fn4":"_function_fn4|function(x) {return x * x;}","date":"_date_2018-01-01T00:00:00.000Z","foo":{"_constructor-name_":"Foo"},"error":{"__isConvertedError__":true,"errorProperties":{"cause":{"code":"001"},"stack":"mocked stack to avoid inconsistent snapshots","aCustomProperty":true,"name":"SomeError","message":"Custom error message","_constructor-name_":"SomeError"}},"nested":{"a":{"b":{"c":{"d":{"e":{"f":{"g":{"h":{"i":{"j":"[Object]"}}}}}}}}}},"undef":"_undefined_","cyclic":"_duplicate_[]"}"`;
