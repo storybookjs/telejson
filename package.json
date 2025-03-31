@@ -28,9 +28,6 @@
     "test:coverage": "TZ=UTC vitest run --coverage",
     "release": "yarn build && auto shipit"
   },
-  "dependencies": {
-    "memoizerific": "^1.11.3"
-  },
   "devDependencies": {
     "@auto-it/released": "^11.0.1",
     "@biomejs/biome": "^1.9.4",

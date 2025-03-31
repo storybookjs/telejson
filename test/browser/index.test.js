@@ -15,8 +15,6 @@ const tests = ({ stringify, parse }) => {
       composed: true,
       cancelable: true,
       timeStamp: expect.any(Number),
-      ...(parsed.isTrusted !== undefined && { isTrusted: expect.any(Boolean) }),
-      ...(parsed.returnValue !== undefined && { returnValue: expect.any(Boolean) }),
     });
   });
 
@@ -28,7 +26,7 @@ const tests = ({ stringify, parse }) => {
       detail: { aKey: 'a Value' },
     });
 
-    const stringified = stringify(event, { allowClass: true });
+    const stringified = stringify(event);
 
     const parsed = parse(stringified);
 
@@ -39,8 +37,6 @@ const tests = ({ stringify, parse }) => {
       cancelable: true,
       timeStamp: expect.any(Number),
       detail: { aKey: 'a Value' },
-      ...(parsed.isTrusted !== undefined && { isTrusted: expect.any(Boolean) }),
-      ...(parsed.returnValue !== undefined && { returnValue: expect.any(Boolean) }),
     });
   });
 
@@ -52,7 +48,7 @@ const tests = ({ stringify, parse }) => {
       detail: { aKey: 'a Value' },
     });
 
-    const stringified = stringify({ key: 'value', args: event }, { allowClass: true });
+    const stringified = stringify({ key: 'value', args: event });
 
     const parsed = parse(stringified);
 
@@ -65,8 +61,6 @@ const tests = ({ stringify, parse }) => {
         cancelable: true,
         timeStamp: expect.any(Number),
         detail: { aKey: 'a Value' },
-        ...(parsed.args.isTrusted !== undefined && { isTrusted: expect.any(Boolean) }),
-        ...(parsed.args.returnValue !== undefined && { returnValue: expect.any(Boolean) }),
       },
     });
   });

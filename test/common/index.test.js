@@ -75,7 +75,6 @@ const data = {
     return x * x;
   },
   date,
-  foo: new Foo(),
   error: new SomeError(),
   nested,
   undef,
@@ -124,10 +123,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
 
-    // test Foo instance
-    expect(parsed.foo).toBeDefined();
-    expect(parsed.foo.constructor.name).toBe('Foo');
-    expect(parsed.foo instanceof Foo).toBe(false);
 
     // test Error instance
     expect(parsed.error).toBeDefined();
@@ -177,77 +172,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
   });
 
-  it('check constructor value', () => {
-    const data = { ConstructorFruit: new Foo() };
 
-    const stringified = stringify(data);
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
-    expect(parsed.ConstructorFruit).toBeDefined();
-    expect(parsed.ConstructorFruit.constructor.name).toBe('Foo');
-    expect(parsed.foo instanceof Foo).toBe(false);
-  });
-
-  it('NOT check constructor value when disabled via options in parse', () => {
-    const data = { ConstructorFruit: new Foo() };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified, { allowFunction: false });
-
-    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
-    expect(parsed.ConstructorFruit).toBeDefined();
-    expect(parsed.ConstructorFruit.constructor.name).toBe('Object');
-    expect(parsed.ConstructorFruit).toEqual({ '_constructor-name_': 'Foo' });
-  });
-
-  it('check function value', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual(
-      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
-    );
-    expect(parsed.FunctionFruit('orange')).toEqual(['orange', 'apple']);
-    expect(parsed.FunctionFruit.toString()).toEqual(
-      "function Fruit(value) {return [value, 'apple'];}"
-    );
-  });
-
-  it('NOT check function value when disabled via options in parse', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified, { allowFunction: false });
-
-    expect(stringified).toEqual(
-      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
-    );
-    expect(parsed.FunctionFruit).toEqual(
-      "_function_Fruit|function Fruit(value) {return [value, 'apple'];}"
-    );
-  });
-
-  it('NOT check function value when disabled via options in stringify', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data, { allowFunction: false });
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual('{}');
-    expect(parsed.FunctionFruit).not.toBeDefined();
-  });
 
   it('check regExp value', () => {
     const data = { RegExpFruit: /test/g };
@@ -379,8 +304,6 @@ const tests = ({ stringify, parse }) => {
       f: [1, 2, 3, 4, 5],
       g: undefined,
       h: null,
-      i: () => {},
-      j() {},
     };
 
     data.e = {
@@ -389,7 +312,7 @@ const tests = ({ stringify, parse }) => {
 
     const stringified = stringify(data);
     expect(stringified).toMatchInlineSnapshot(
-      `"{"a":1,"b":"2","c":"_NaN_","d":true,"f":[1,2,3,4,5],"g":"_undefined_","h":null,"i":"_function_i|() => {}","j":"_function_j|function() {}","e":{"1":"_duplicate_[]"}}"`
+      `"{"a":1,"b":"2","c":"_NaN_","d":true,"f":[1,2,3,4,5],"g":"_undefined_","h":null,"e":{"1":"_duplicate_[]"}}"`
     );
 
     const parsed = parse(stringified);
@@ -420,17 +343,13 @@ const tests = ({ stringify, parse }) => {
   });
 
   it('dots in keys', () => {
-    class Foo {}
-    class Bar {}
-    const foo = new Foo();
-    const bar = new Bar();
-    const data = { 'foo.a': bar, foo: { a: foo }, 'foo.b': foo };
+    const data = { 'foo.a': 'bar', foo: { a: 'foo' }, 'foo.b': 'foo' };
 
     const stringified = stringify(data);
 
     const parsed = parse(stringified);
 
-    expect(parsed['foo.b'].constructor.name).toEqual('Foo');
+    expect(parsed['foo.b']).toEqual('foo');
   });
 
   it('filter out properties that throw on access', () => {
@@ -479,16 +398,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 
-  it('parcel example', () => {
-    class $123Class {}
-
-    const example = new $123Class();
-
-    const stringified = stringify({ example });
-    const parsed = parse(stringified);
-
-    expect(parsed).toEqual({ example: {} });
-  });
 };
 
 describe('Dist', () => {

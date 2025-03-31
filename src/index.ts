@@ -3,95 +3,17 @@ import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
 import { get } from 'lodash-es';
-import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
-
-const removeCodeComments = (code: string) => {
-  let inQuoteChar = null;
-  let inBlockComment = false;
-  let inLineComment = false;
-  let inRegexLiteral = false;
-  let newCode = '';
-
-  if (code.indexOf('//') >= 0 || code.indexOf('/*') >= 0) {
-    for (let i = 0; i < code.length; i += 1) {
-      if (!inQuoteChar && !inBlockComment && !inLineComment && !inRegexLiteral) {
-        if (code[i] === '"' || code[i] === "'" || code[i] === '`') {
-          inQuoteChar = code[i];
-        } else if (code[i] === '/' && code[i + 1] === '*') {
-          inBlockComment = true;
-        } else if (code[i] === '/' && code[i + 1] === '/') {
-          inLineComment = true;
-        } else if (code[i] === '/' && code[i + 1] !== '/') {
-          inRegexLiteral = true;
-        }
-      } else {
-        if (
-          inQuoteChar &&
-          ((code[i] === inQuoteChar && code[i - 1] !== '\\') ||
-            (code[i] === '\n' && inQuoteChar !== '`'))
-        ) {
-          inQuoteChar = null;
-        }
-        if (inRegexLiteral && ((code[i] === '/' && code[i - 1] !== '\\') || code[i] === '\n')) {
-          inRegexLiteral = false;
-        }
-        if (inBlockComment && code[i - 1] === '/' && code[i - 2] === '*') {
-          inBlockComment = false;
-        }
-        if (inLineComment && code[i] === '\n') {
-          inLineComment = false;
-        }
-      }
-      if (!inBlockComment && !inLineComment) {
-        newCode += code[i];
-      }
-    }
-  } else {
-    newCode = code;
-  }
-
-  return newCode;
-};
-
-const cleanCode = memoize(10000)((code: string) =>
-  removeCodeComments(code)
-    .replace(/\n\s*/g, '') // remove indents & newlines
-    .trim()
-);
-
-const convertShorthandMethods = function convertShorthandMethods(key: string, stringified: string) {
-  const fnHead = stringified.slice(0, stringified.indexOf('{'));
-  const fnBody = stringified.slice(stringified.indexOf('{'));
-
-  if (fnHead.includes('=>')) {
-    // This is an arrow function
-    return stringified;
-  }
-
-  if (fnHead.includes('function')) {
-    // This is an anonymous function
-    return stringified;
-  }
-
-  let modifiedHead = fnHead;
-
-  modifiedHead = modifiedHead.replace(key, 'function');
-
-  return modifiedHead + fnBody;
-};
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
 export interface Options {
   allowRegExp: boolean;
-  allowFunction: boolean;
   allowSymbol: boolean;
   allowDate: boolean;
   allowUndefined: boolean;
-  allowClass: boolean;
   allowError: boolean;
   maxDepth: number;
   space: number | undefined;
@@ -213,20 +135,7 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (isFunction(value)) {
-        if (!options.allowFunction) {
           return undefined;
-        }
-        const { name } = value;
-        const stringified = value.toString();
-
-        if (
-          !stringified.match(
-            /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
-          )
-        ) {
-          return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
-        }
-        return `_function_${name}|${(() => {}).toString()}`;
       }
 
       if (isSymbol(value)) {
@@ -268,12 +177,11 @@ export const replacer = function replacer(options: Options): any {
         };
       }
 
-      // when it's a class and we don't want to support classes, skip
+      // when it's a class, skip
       if (
         value?.constructor?.name &&
         value.constructor.name !== 'Object' &&
-        !Array.isArray(value) &&
-        !options.allowClass
+        !Array.isArray(value)
       ) {
         return undefined;
       }
@@ -281,21 +189,6 @@ export const replacer = function replacer(options: Options): any {
       const found = objects.get(value);
       if (!found) {
         const converted = Array.isArray(value) ? value : convertUnconventionalData(value);
-
-        if (
-          value?.constructor?.name &&
-          value.constructor.name !== 'Object' &&
-          !Array.isArray(value) &&
-          options.allowClass
-        ) {
-          try {
-            Object.assign(converted, { '_constructor-name_': value.constructor.name });
-          } catch (_e) {
-            // immutable objects can't be written to and throw
-            // we could make a deep copy but if the user values the correct instance name,
-            // the user should make the deep copy themselves.
-          }
-        }
 
         keys.push(key);
         stack.unshift(converted);
@@ -361,46 +254,6 @@ export const reviver = function reviver(options: Options): any {
       return error;
     }
 
-    // deal with instance names
-    if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
-      const name = value['_constructor-name_'];
-      if (name !== 'Object') {
-        
-        const Fn = new Function(`return function ${name.replace(/[^a-zA-Z0-9$_]+/g, '')}(){}`)();
-        Object.setPrototypeOf(value, new Fn());
-      }
-      
-      // biome-ignore lint/performance/noDelete: <explanation>
-            delete value['_constructor-name_'];
-      return value;
-    }
-
-    if (typeof value === 'string' && value.startsWith('_function_') && options.allowFunction) {
-      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
-      
-      const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
-
-      if (!options.lazyEval) {
-        
-        // biome-ignore lint/security/noGlobalEval: <explanation>
-                return eval(`(${sourceSanitized})`);
-      }
-
-      // lazy eval of the function
-      const result = (...args: any[]) => {
-        
-        // biome-ignore lint/security/noGlobalEval: <explanation>
-        const f = eval(`(${sourceSanitized})`);
-        return f(...args);
-      };
-      Object.defineProperty(result, 'toString', {
-        value: () => sourceSanitized,
-      });
-      Object.defineProperty(result, 'name', {
-        value: name,
-      });
-      return result;
-    }
 
     if (typeof value === 'string' && value.startsWith('_regexp_') && options.allowRegExp) {
       // this split isn't working correctly
@@ -448,10 +301,8 @@ export const reviver = function reviver(options: Options): any {
 const defaultOptions: Options = {
   maxDepth: 10,
   space: undefined,
-  allowFunction: true,
   allowRegExp: true,
   allowDate: true,
-  allowClass: true,
   allowError: true,
   allowUndefined: true,
   allowSymbol: true,
