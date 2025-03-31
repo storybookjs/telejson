@@ -419,6 +419,24 @@ const tests = ({ stringify, parse }) => {
     });
   });
 
+  it('should handle class instances with circular references', () => {
+    class CircularClass {
+      constructor() {
+        this.circular = this;
+      }
+    }
+
+    const instance = new CircularClass();
+    const stringified = stringify(instance);
+    const parsed = parse(stringified);
+
+    expect(parsed).toMatchObject({ circular: parsed });
+
+    expect(stringified).toMatchInlineSnapshot(
+      `"{"circular":"_duplicate_[]"}"`
+    );
+  });
+
 };
 
 describe('Dist', () => {
