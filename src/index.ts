@@ -177,13 +177,25 @@ export const replacer = function replacer(options: Options): any {
         };
       }
 
-      // when it's a class, skip
+      // when it's a class, convert to plain object
       if (
         value?.constructor?.name &&
         value.constructor.name !== 'Object' &&
         !Array.isArray(value)
       ) {
-        return undefined;
+        const plainObject = {
+          __isClassInstance__: true,
+          __className__: value.constructor.name,
+          ...Object.getOwnPropertyNames(value).reduce((acc, prop) => {
+            try {
+              acc[prop] = value[prop];
+            } catch (_err) {
+              // Skip properties that throw on access
+            }
+            return acc;
+          }, {} as Record<string, any>),
+        };
+        return plainObject;
       }
 
       const found = objects.get(value);

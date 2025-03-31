@@ -398,6 +398,27 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 
+  it('should handle class instances', () => {
+    class TestClass {
+      constructor() {
+        this.prop1 = 'value1';
+        this.prop2 = 42;
+      }
+      method() {
+        return 'test';
+      }
+    }
+
+    const instance = new TestClass();
+    const stringified = stringify(instance);
+    const parsed = parse(stringified);
+
+    expect(parsed).toMatchObject({
+      prop1: 'value1',
+      prop2: 42,
+    });
+  });
+
 };
 
 describe('Dist', () => {
