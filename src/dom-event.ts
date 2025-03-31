@@ -38,7 +38,9 @@ export function extractEventHiddenProperties(event: Event) {
     }, {});
 
   if (event instanceof CustomEvent) {
-    for (const value of customEventSpecificProperties.filter((value) => event[value] !== undefined)) {
+    for (const value of customEventSpecificProperties.filter(
+      (value) => event[value] !== undefined
+    )) {
       rebuildEvent[value] = event[value];
     }
   }

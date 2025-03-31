@@ -43,7 +43,6 @@ function convertUnconventionalData(data: unknown) {
       // Try accessing a property to test if we are allowed to do so
       // We have a if statement, and not a optional chaining, because webpack4 doesn't support it, and react-native uses it
       if (result[key]) {
-        
         result[key].toJSON;
       }
 
@@ -135,7 +134,7 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (isFunction(value)) {
-          return undefined;
+        return undefined;
       }
 
       if (isSymbol(value)) {
@@ -186,14 +185,17 @@ export const replacer = function replacer(options: Options): any {
         const plainObject = {
           __isClassInstance__: true,
           __className__: value.constructor.name,
-          ...Object.getOwnPropertyNames(value).reduce((acc, prop) => {
-            try {
-              acc[prop] = value[prop];
-            } catch (_err) {
-              // Skip properties that throw on access
-            }
-            return acc;
-          }, {} as Record<string, any>),
+          ...Object.getOwnPropertyNames(value).reduce(
+            (acc, prop) => {
+              try {
+                acc[prop] = value[prop];
+              } catch (_err) {
+                // Skip properties that throw on access
+              }
+              return acc;
+            },
+            {} as Record<string, any>
+          ),
         };
         return plainObject;
       }
@@ -223,7 +225,7 @@ export const replacer = function replacer(options: Options): any {
 
 interface ValueContainer {
   '_constructor-name_'?: string;
-  
+
   [keys: string]: any;
 }
 
@@ -238,15 +240,13 @@ export const reviver = function reviver(options: Options): any {
 
       // restore cyclic refs
       // biome-ignore lint/complexity/noForEach: <explanation>
-            refs.forEach(({ target, container, replacement }) => {
+      refs.forEach(({ target, container, replacement }) => {
         const replacementArr = isJSON(replacement)
           ? JSON.parse(replacement)
           : replacement.split('.');
         if (replacementArr.length === 0) {
-          
           container[target] = root;
         } else {
-          
           container[target] = get(root, replacementArr);
         }
       });
@@ -256,7 +256,6 @@ export const reviver = function reviver(options: Options): any {
       return value;
     }
 
-    
     if (isObject<ValueContainer>(value) && value.__isConvertedError__) {
       // reconstruct the error with its original properties
       const { message, ...properties } = value.errorProperties;
@@ -265,7 +264,6 @@ export const reviver = function reviver(options: Options): any {
 
       return error;
     }
-
 
     if (typeof value === 'string' && value.startsWith('_regexp_') && options.allowRegExp) {
       // this split isn't working correctly
@@ -336,7 +334,6 @@ const mutator = () => {
       // biome-ignore lint/complexity/noForEach: <explanation>
       Object.entries(value).forEach(([k, v]) => {
         if (v === '_undefined_') {
-          
           value[k] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);
@@ -348,7 +345,7 @@ const mutator = () => {
       value.forEach((v, index) => {
         if (v === '_undefined_') {
           mutated.set(v, true);
-          
+
           value[index] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);

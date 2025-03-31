@@ -15,8 +15,6 @@ function fn3() {
   return x / x;
 }
 
-class Foo {}
-
 class SomeError extends Error {
   aCustomProperty = true;
   stack = 'mocked stack to avoid inconsistent snapshots';
@@ -123,7 +121,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
 
-
     // test Error instance
     expect(parsed.error).toBeDefined();
     expect(parsed.error.message).toEqual('Custom error message');
@@ -171,8 +168,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic).toBe(parsed);
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
   });
-
-
 
   it('check regExp value', () => {
     const data = { RegExpFruit: /test/g };
@@ -432,11 +427,8 @@ const tests = ({ stringify, parse }) => {
 
     expect(parsed).toMatchObject({ circular: parsed });
 
-    expect(stringified).toMatchInlineSnapshot(
-      `"{"circular":"_duplicate_[]"}"`
-    );
+    expect(stringified).toMatchInlineSnapshot(`"{"circular":"_duplicate_[]"}"`);
   });
-
 };
 
 describe('Dist', () => {
