@@ -181,22 +181,35 @@ export const replacer = function replacer(options: Options): any {
         value.constructor.name !== 'Object' &&
         !Array.isArray(value)
       ) {
-        const plainObject = {
-          __isClassInstance__: true,
-          __className__: value.constructor.name,
-          ...Object.getOwnPropertyNames(value).reduce(
-            (acc, prop) => {
-              try {
-                acc[prop] = value[prop];
-              } catch (_err) {
-                // Skip properties that throw on access
-              }
-              return acc;
-            },
-            {} as Record<string, any>
-          ),
-        };
-        return plainObject;
+        const found = objects.get(value);
+        if (!found) {
+          const plainObject = {
+            __isClassInstance__: true,
+            __className__: value.constructor.name,
+            ...Object.getOwnPropertyNames(value).reduce(
+              (acc, prop) => {
+                try {
+                  acc[prop] = value[prop];
+                } catch (_err) {
+                  // Skip properties that throw on access
+                }
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
+          };
+
+          keys.push(key);
+          stack.unshift(plainObject);
+          objects.set(value, JSON.stringify(keys));
+
+          if (value !== plainObject) {
+            map.set(value, plainObject);
+          }
+
+          return plainObject;
+        }
+        return `_duplicate_${found}`;
       }
 
       const found = objects.get(value);
