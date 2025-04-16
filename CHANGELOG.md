@@ -1,3 +1,15 @@
+# v8.0.0 (Wed Apr 16 2025)
+
+#### 💥 Breaking Change
+
+- Modernize, and remove function-support [#106](https://github.com/storybookjs/telejson/pull/106) ([@ndelangen](https://github.com/ndelangen))
+
+#### Authors: 1
+
+- Norbert de Langen ([@ndelangen](https://github.com/ndelangen))
+
+---
+
 # 8.0.0 (to be released)
 
 #### Dropped support
