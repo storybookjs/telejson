@@ -1,8 +1,16 @@
 {
   "name": "telejson",
-  "version": "7.2.0",
+  "version": "8.0.0",
   "description": "",
-  "keywords": ["JSON", "cyclic", "cyclical", "date", "parse", "regex", "stringify"],
+  "keywords": [
+    "JSON",
+    "cyclic",
+    "cyclical",
+    "date",
+    "parse",
+    "regex",
+    "stringify"
+  ],
   "homepage": "https://github.com/storybookjs/telejson",
   "bugs": {
     "url": "https://github.com/storybookjs/telejson/issues"
@@ -16,7 +24,12 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*", "README.md", "*.js", "*.d.ts"],
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "*.js",
+    "*.d.ts"
+  ],
   "scripts": {
     "build": "tsup",
     "lint": "biome lint .",
@@ -50,7 +63,10 @@
     "access": "public"
   },
   "auto": {
-    "plugins": ["npm", "released"]
+    "plugins": [
+      "npm",
+      "released"
+    ]
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
 }
