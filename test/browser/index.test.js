@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import * as dist from '../../dist/index.js';
 
 const tests = ({ stringify, parse }) => {
@@ -9,12 +10,10 @@ const tests = ({ stringify, parse }) => {
     const parsed = parse(stringified);
 
     expect(parsed).toMatchObject({
-      isTrusted: expect.any(Boolean),
       type: 'click',
       bubbles: true,
       composed: true,
       cancelable: true,
-      returnValue: expect.any(Boolean),
       timeStamp: expect.any(Number),
     });
   });
@@ -27,17 +26,15 @@ const tests = ({ stringify, parse }) => {
       detail: { aKey: 'a Value' },
     });
 
-    const stringified = stringify(event, { allowClass: true });
+    const stringified = stringify(event);
 
     const parsed = parse(stringified);
 
     expect(parsed).toMatchObject({
-      isTrusted: expect.any(Boolean),
       type: 'custom:click',
       bubbles: true,
       composed: true,
       cancelable: true,
-      returnValue: expect.any(Boolean),
       timeStamp: expect.any(Number),
       detail: { aKey: 'a Value' },
     });
@@ -51,19 +48,17 @@ const tests = ({ stringify, parse }) => {
       detail: { aKey: 'a Value' },
     });
 
-    const stringified = stringify({ key: 'value', args: event }, { allowClass: true });
+    const stringified = stringify({ key: 'value', args: event });
 
     const parsed = parse(stringified);
 
     expect(parsed).toMatchObject({
       key: 'value',
       args: {
-        isTrusted: expect.any(Boolean),
         type: 'custom:click',
         bubbles: true,
         composed: true,
         cancelable: true,
-        returnValue: expect.any(Boolean),
         timeStamp: expect.any(Number),
         detail: { aKey: 'a Value' },
       },

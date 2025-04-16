@@ -1,11 +1,10 @@
-name: Release
+name: Test
 
 on: [push]
 
 jobs:
-  release:
+  test:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +27,7 @@ jobs:
         run: |
           pnpm run build
 
-      - name: Create Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Test
         run: |
-          pnpm run release
+          pnpm run test

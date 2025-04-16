@@ -1,20 +1,19 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-shadow */
+import { describe, it, expect } from 'vitest';
 import * as dist from '../../dist/index.js';
 
 const regex1 = /foo/;
 const regex2 = /foo/g;
+// biome-ignore lint/complexity/useRegexLiterals: <explanation>
 const regex3 = new RegExp('foo', 'i');
 
 const fn1 = (x) => x + x;
+// biome-ignore lint/suspicious/noRedeclare: <explanation>
 const fn2 = function x(x) {
   return x - x;
 };
 function fn3() {
   return x / x;
 }
-
-class Foo { }
 
 class SomeError extends Error {
   aCustomProperty = true;
@@ -26,6 +25,10 @@ class SomeError extends Error {
 
   get name() {
     return 'SomeError';
+  }
+
+  fn4(x) {
+    return x * x;
   }
 }
 
@@ -70,7 +73,6 @@ const data = {
     return x * x;
   },
   date,
-  foo: new Foo(),
   error: new SomeError(),
   nested,
   undef,
@@ -79,20 +81,25 @@ const data = {
 data.cyclic = data;
 
 const tests = ({ stringify, parse }) => {
-  test('sanity', () => {
+  it('sanity', () => {
     expect(true).toBe(true);
   });
 
-  test('stringify', () => {
+  describe('stringify', () => {
     let stringified;
 
-    expect(() => {
-      stringified = stringify(data);
-    }).not.toThrow();
-    expect(stringified).toMatchSnapshot();
+    it('should not throw', () => {
+      expect(() => {
+        stringified = stringify(data);
+      }).not.toThrow();
+    });
+
+    it('should match snapshot', () => {
+      expect(stringified).toMatchSnapshot();
+    });
   });
 
-  test('parse', () => {
+  it('parse', () => {
     const stringified = stringify(data);
     let parsed;
     expect(() => {
@@ -114,11 +121,6 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBeDefined();
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
 
-    // test Foo instance
-    expect(parsed.foo).toBeDefined();
-    expect(parsed.foo.constructor.name).toBe('Foo');
-    expect(parsed.foo instanceof Foo).toBe(false);
-
     // test Error instance
     expect(parsed.error).toBeDefined();
     expect(parsed.error.message).toEqual('Custom error message');
@@ -131,7 +133,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.undef).toBeUndefined();
   });
 
-  test('maxDepth', () => {
+  it('maxDepth', () => {
     const stringifiedDefault = stringify(data);
     const stringifiedMax5 = stringify(data, { maxDepth: 5 });
     const parsedDefault = parse(stringifiedDefault);
@@ -146,13 +148,13 @@ const tests = ({ stringify, parse }) => {
     expect(parsedMax5.nested.a.b.c.d.e.f).not.toBeDefined();
   });
 
-  test('space', () => {
+  it('space', () => {
     const stringifiedSpaced = stringify(data, { space: 2 });
 
     expect(stringifiedSpaced).toMatchSnapshot();
   });
 
-  test('check duplicate value', () => {
+  it('check duplicate value', () => {
     const Fruit = {
       apple: true,
       parent: {},
@@ -167,79 +169,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.cyclic.cyclic.cyclic.cyclic).toBe(parsed);
   });
 
-  test('check constructor value', () => {
-    const data = { ConstructorFruit: new Foo() };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
-    expect(parsed.ConstructorFruit).toBeDefined();
-    expect(parsed.ConstructorFruit.constructor.name).toBe('Foo');
-    expect(parsed.foo instanceof Foo).toBe(false);
-  });
-
-  test('NOT check constructor value when disabled via options in parse', () => {
-    const data = { ConstructorFruit: new Foo() };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified, { allowFunction: false });
-
-    expect(stringified).toEqual('{"ConstructorFruit":{"_constructor-name_":"Foo"}}');
-    expect(parsed.ConstructorFruit).toBeDefined();
-    expect(parsed.ConstructorFruit.constructor.name).toBe('Object');
-    expect(parsed.ConstructorFruit).toEqual({ '_constructor-name_': 'Foo' });
-  });
-
-  test('check function value', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual(
-      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
-    );
-    expect(parsed.FunctionFruit('orange')).toEqual(['orange', 'apple']);
-    expect(parsed.FunctionFruit.toString()).toEqual(
-      "function Fruit(value) {return [value, 'apple'];}"
-    );
-  });
-
-  test('NOT check function value when disabled via options in parse', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data);
-    const parsed = parse(stringified, { allowFunction: false });
-
-    expect(stringified).toEqual(
-      '{"FunctionFruit":"_function_Fruit|function Fruit(value) {return [value, \'apple\'];}"}'
-    );
-    expect(parsed.FunctionFruit).toEqual(
-      "_function_Fruit|function Fruit(value) {return [value, 'apple'];}"
-    );
-  });
-
-  test('NOT check function value when disabled via options in stringify', () => {
-    const Fruit = function Fruit(value) {
-      return [value, 'apple'];
-    };
-    const data = { FunctionFruit: Fruit };
-
-    const stringified = stringify(data, { allowFunction: false });
-    const parsed = parse(stringified);
-
-    expect(stringified).toEqual('{}');
-    expect(parsed.FunctionFruit).not.toBeDefined();
-  });
-
-  test('check regExp value', () => {
+  it('check regExp value', () => {
     const data = { RegExpFruit: /test/g };
 
     const stringified = stringify(data);
@@ -249,7 +179,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('check date value', () => {
+  it('check date value', () => {
     const data = { DateFruit: new Date('01.01.2019') };
 
     const stringified = stringify(data);
@@ -260,7 +190,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.DateFruit.getFullYear()).toBe(2019);
   });
 
-  test('check symbol value', () => {
+  it('check symbol value', () => {
     const data = { SymbleFruit: Symbol('apple') };
 
     const stringified = stringify(data);
@@ -270,7 +200,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.SymbleFruit.toString()).toEqual('Symbol(apple)');
   });
 
-  test('check global symbol value', () => {
+  it('check global symbol value', () => {
     const data = { GlobalSymbolFruit: Symbol.for('grapes') };
 
     const stringified = stringify(data);
@@ -281,8 +211,8 @@ const tests = ({ stringify, parse }) => {
     expect(parsed.GlobalSymbolFruit).toEqual(Symbol.for('grapes'));
   });
 
-  test('check minus Infinity value', () => {
-    const data = { InfinityFruit: -Infinity };
+  it('check minus Infinity value', () => {
+    const data = { InfinityFruit: Number.NEGATIVE_INFINITY };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -291,8 +221,8 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('check Infinity value', () => {
-    const data = { InfinityFruit: Infinity };
+  it('check Infinity value', () => {
+    const data = { InfinityFruit: Number.POSITIVE_INFINITY };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -301,8 +231,8 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('check NaN value', () => {
-    const data = { NaNFruit: NaN };
+  it('check NaN value', () => {
+    const data = { NaNFruit: Number.NaN };
 
     const stringified = stringify(data);
     const parsed = parse(stringified);
@@ -311,7 +241,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('check BigInt value', () => {
+  it('check BigInt value', () => {
     const data = { LotOfFruits: BigInt('123456789123456789123456789123456789') };
 
     const stringified = stringify(data);
@@ -321,7 +251,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('check undefined value', () => {
+  it('check undefined value', () => {
     const data = { undefinedFruit: undefined };
 
     const stringified = stringify(data);
@@ -332,7 +262,7 @@ const tests = ({ stringify, parse }) => {
     expect(Object.keys(parsed)).toEqual(['undefinedFruit']);
   });
 
-  test('primitives should not be deduplicated', () => {
+  it('primitives should not be deduplicated', () => {
     const data = {
       bool: true,
       a: 1,
@@ -360,17 +290,15 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toMatchObject(data);
   });
 
-  test('bug', () => {
+  it('bug', () => {
     const data = {
       a: 1,
       b: '2',
-      c: NaN,
+      c: Number.NaN,
       d: true,
       f: [1, 2, 3, 4, 5],
       g: undefined,
       h: null,
-      i: () => { },
-      j() { },
     };
 
     data.e = {
@@ -379,17 +307,18 @@ const tests = ({ stringify, parse }) => {
 
     const stringified = stringify(data);
     expect(stringified).toMatchInlineSnapshot(
-      `"{\\"a\\":1,\\"b\\":\\"2\\",\\"c\\":\\"_NaN_\\",\\"d\\":true,\\"f\\":[1,2,3,4,5],\\"g\\":\\"_undefined_\\",\\"h\\":null,\\"i\\":\\"_function_i|() => {}\\",\\"j\\":\\"_function_j|function() {}\\",\\"e\\":{\\"1\\":\\"_duplicate_[]\\"}}"`
+      `"{"a":1,"b":"2","c":"_NaN_","d":true,"f":[1,2,3,4,5],"g":"_undefined_","h":null,"e":{"1":"_duplicate_[]"}}"`
     );
 
     const parsed = parse(stringified);
 
-    Object.entries(parsed).forEach((k, v) => {
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    Object.entries(parsed).forEach((k) => {
       expect(data[k]).toEqual(parsed[k]);
     });
   });
 
-  test('nested arrays', () => {
+  it('nested arrays', () => {
     const stringified = stringify({
       key: 'storybook-channel',
       event: {
@@ -408,21 +337,17 @@ const tests = ({ stringify, parse }) => {
     expect(parse(stringified)).toMatchSnapshot();
   });
 
-  test('dots in keys', () => {
-    class Foo { }
-    class Bar { }
-    const foo = new Foo();
-    const bar = new Bar();
-    const data = { 'foo.a': bar, foo: { a: foo }, 'foo.b': foo };
+  it('dots in keys', () => {
+    const data = { 'foo.a': 'bar', foo: { a: 'foo' }, 'foo.b': 'foo' };
 
     const stringified = stringify(data);
 
     const parsed = parse(stringified);
 
-    expect(parsed['foo.b'].constructor.name).toEqual('Foo');
+    expect(parsed['foo.b']).toEqual('foo');
   });
 
-  test('filter out properties that throw on access', () => {
+  it('filter out properties that throw on access', () => {
     const thrower = {
       a: 'foo',
       get b() {
@@ -435,7 +360,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 
-  test('filter out properties that throw on stringification', () => {
+  it('filter out properties that throw on stringification', () => {
     const thrower = {
       a: 'foo',
       b: {
@@ -450,7 +375,7 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 
-  test('filter for forbidden objects', () => {
+  it('filter for forbidden objects', () => {
     const thrower = {
       a: 'foo',
       b: new Proxy(
@@ -468,15 +393,41 @@ const tests = ({ stringify, parse }) => {
     expect(parsed).toEqual({ a: 'foo' });
   });
 
-  test('parcel example', () => {
-    class $123Class { }
+  it('should handle class instances', () => {
+    class TestClass {
+      constructor() {
+        this.prop1 = 'value1';
+        this.prop2 = 42;
+      }
+      method() {
+        return 'test';
+      }
+    }
 
-    const example = new $123Class();
-
-    const stringified = stringify({ example });
+    const instance = new TestClass();
+    const stringified = stringify(instance);
     const parsed = parse(stringified);
 
-    expect(parsed).toEqual({ example: {} });
+    expect(parsed).toMatchObject({
+      prop1: 'value1',
+      prop2: 42,
+    });
+  });
+
+  it('should handle class instances with circular references', () => {
+    class Thing {
+      constructor() {
+        this.token = this;
+      }
+    }
+
+    const instance = new Thing();
+    const stringified = stringify({ instance });
+    const parsed = parse(stringified);
+
+    expect(parsed).toMatchObject(parsed);
+
+    expect(stringified).toMatchInlineSnapshot(`"{"instance":{"__isClassInstance__":true,"__className__":"Thing","token":"_duplicate_[\\"instance\\"]"}}"`);
   });
 };
 

@@ -1,107 +1,24 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable import/no-extraneous-dependencies */
 import isRegExp from 'is-regex';
 import isFunction from 'is-function';
 import isSymbol from 'is-symbol';
 import isObjectAny from 'isobject';
 import { get } from 'lodash-es';
-import memoize from 'memoizerific';
 import { extractEventHiddenProperties } from './dom-event';
 
-// eslint-disable-next-line @typescript-eslint/ban-types, no-use-before-define
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
-
-const removeCodeComments = (code: string) => {
-  let inQuoteChar = null;
-  let inBlockComment = false;
-  let inLineComment = false;
-  let inRegexLiteral = false;
-  let newCode = '';
-
-  if (code.indexOf('//') >= 0 || code.indexOf('/*') >= 0) {
-    for (let i = 0; i < code.length; i += 1) {
-      if (!inQuoteChar && !inBlockComment && !inLineComment && !inRegexLiteral) {
-        if (code[i] === '"' || code[i] === "'" || code[i] === '`') {
-          inQuoteChar = code[i];
-        } else if (code[i] === '/' && code[i + 1] === '*') {
-          inBlockComment = true;
-        } else if (code[i] === '/' && code[i + 1] === '/') {
-          inLineComment = true;
-        } else if (code[i] === '/' && code[i + 1] !== '/') {
-          inRegexLiteral = true;
-        }
-      } else {
-        if (
-          inQuoteChar &&
-          ((code[i] === inQuoteChar && code[i - 1] !== '\\') ||
-            (code[i] === '\n' && inQuoteChar !== '`'))
-        ) {
-          inQuoteChar = null;
-        }
-        if (inRegexLiteral && ((code[i] === '/' && code[i - 1] !== '\\') || code[i] === '\n')) {
-          inRegexLiteral = false;
-        }
-        if (inBlockComment && code[i - 1] === '/' && code[i - 2] === '*') {
-          inBlockComment = false;
-        }
-        if (inLineComment && code[i] === '\n') {
-          inLineComment = false;
-        }
-      }
-      if (!inBlockComment && !inLineComment) {
-        newCode += code[i];
-      }
-    }
-  } else {
-    newCode = code;
-  }
-
-  return newCode;
-};
-
-const cleanCode = memoize(10000)((code: string) =>
-  removeCodeComments(code)
-    .replace(/\n\s*/g, '') // remove indents & newlines
-    .trim()
-);
-
-const convertShorthandMethods = function convertShorthandMethods(key: string, stringified: string) {
-  const fnHead = stringified.slice(0, stringified.indexOf('{'));
-  const fnBody = stringified.slice(stringified.indexOf('{'));
-
-  if (fnHead.includes('=>')) {
-    // This is an arrow function
-    return stringified;
-  }
-
-  if (fnHead.includes('function')) {
-    // This is an anonymous function
-    return stringified;
-  }
-
-  let modifiedHead = fnHead;
-
-  modifiedHead = modifiedHead.replace(key, 'function');
-
-  return modifiedHead + fnBody;
-};
 
 const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
 export interface Options {
   allowRegExp: boolean;
-  allowFunction: boolean;
   allowSymbol: boolean;
   allowDate: boolean;
   allowUndefined: boolean;
-  allowClass: boolean;
   allowError: boolean;
   maxDepth: number;
   space: number | undefined;
-  lazyEval: boolean;
 }
 
-// eslint-disable-next-line no-useless-escape
 export const isJSON = (input: string) => input.match(/^[\[\{\"\}].*[\]\}\"]$/);
 
 function convertUnconventionalData(data: unknown) {
@@ -125,12 +42,11 @@ function convertUnconventionalData(data: unknown) {
       // Try accessing a property to test if we are allowed to do so
       // We have a if statement, and not a optional chaining, because webpack4 doesn't support it, and react-native uses it
       if (result[key]) {
-        // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
         result[key].toJSON;
       }
 
       acc[key] = result[key];
-    } catch (err) {
+    } catch (_err) {
       wasMutated = true;
     }
     return acc;
@@ -181,10 +97,10 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (typeof value === 'number') {
-        if (value === -Infinity) {
+        if (value === Number.NEGATIVE_INFINITY) {
           return '_-Infinity_';
         }
-        if (value === Infinity) {
+        if (value === Number.POSITIVE_INFINITY) {
           return '_Infinity_';
         }
         if (Number.isNaN(value)) {
@@ -217,20 +133,7 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (isFunction(value)) {
-        if (!options.allowFunction) {
-          return undefined;
-        }
-        const { name } = value;
-        const stringified = value.toString();
-
-        if (
-          !stringified.match(
-            /(\[native code\]|WEBPACK_IMPORTED_MODULE|__webpack_exports__|__webpack_require__)/
-          )
-        ) {
-          return `_function_${name}|${cleanCode(convertShorthandMethods(key, stringified))}`;
-        }
-        return `_function_${name}|${(() => {}).toString()}`;
+        return undefined;
       }
 
       if (isSymbol(value)) {
@@ -272,36 +175,46 @@ export const replacer = function replacer(options: Options): any {
         };
       }
 
-      // when it's a class and we don't want to support classes, skip
+      // when it's a class, convert to plain object
       if (
-        value.constructor &&
-        value.constructor.name &&
+        value?.constructor?.name &&
         value.constructor.name !== 'Object' &&
-        !Array.isArray(value) &&
-        !options.allowClass
+        !Array.isArray(value)
       ) {
-        return undefined;
+        const found = objects.get(value);
+        if (!found) {
+          const plainObject = {
+            __isClassInstance__: true,
+            __className__: value.constructor.name,
+            ...Object.getOwnPropertyNames(value).reduce(
+              (acc, prop) => {
+                try {
+                  acc[prop] = value[prop];
+                } catch (_err) {
+                  // Skip properties that throw on access
+                }
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
+          };
+
+          keys.push(key);
+          stack.unshift(plainObject);
+          objects.set(value, JSON.stringify(keys));
+
+          if (value !== plainObject) {
+            map.set(value, plainObject);
+          }
+
+          return plainObject;
+        }
+        return `_duplicate_${found}`;
       }
 
       const found = objects.get(value);
       if (!found) {
         const converted = Array.isArray(value) ? value : convertUnconventionalData(value);
-
-        if (
-          value.constructor &&
-          value.constructor.name &&
-          value.constructor.name !== 'Object' &&
-          !Array.isArray(value) &&
-          options.allowClass
-        ) {
-          try {
-            Object.assign(converted, { '_constructor-name_': value.constructor.name });
-          } catch (e) {
-            // immutable objects can't be written to and throw
-            // we could make a deep copy but if the user values the correct instance name,
-            // the user should make the deep copy themselves.
-          }
-        }
 
         keys.push(key);
         stack.unshift(converted);
@@ -316,7 +229,7 @@ export const replacer = function replacer(options: Options): any {
 
       //  actually, here's the only place where the keys keeping is useful
       return `_duplicate_${found}`;
-    } catch (e) {
+    } catch (_e) {
       return undefined;
     }
   };
@@ -324,6 +237,7 @@ export const replacer = function replacer(options: Options): any {
 
 interface ValueContainer {
   '_constructor-name_'?: string;
+
   [keys: string]: any;
 }
 
@@ -337,15 +251,14 @@ export const reviver = function reviver(options: Options): any {
       root = value;
 
       // restore cyclic refs
+      // biome-ignore lint/complexity/noForEach: <explanation>
       refs.forEach(({ target, container, replacement }) => {
         const replacementArr = isJSON(replacement)
           ? JSON.parse(replacement)
           : replacement.split('.');
         if (replacementArr.length === 0) {
-          // eslint-disable-next-line no-param-reassign
           container[target] = root;
         } else {
-          // eslint-disable-next-line no-param-reassign
           container[target] = get(root, replacementArr);
         }
       });
@@ -355,7 +268,6 @@ export const reviver = function reviver(options: Options): any {
       return value;
     }
 
-    // eslint-disable-next-line no-underscore-dangle
     if (isObject<ValueContainer>(value) && value.__isConvertedError__) {
       // reconstruct the error with its original properties
       const { message, ...properties } = value.errorProperties;
@@ -363,44 +275,6 @@ export const reviver = function reviver(options: Options): any {
       Object.assign(error, properties);
 
       return error;
-    }
-
-    // deal with instance names
-    if (isObject<ValueContainer>(value) && value['_constructor-name_'] && options.allowFunction) {
-      const name = value['_constructor-name_'];
-      if (name !== 'Object') {
-        // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval
-        const Fn = new Function(`return function ${name.replace(/[^a-zA-Z0-9$_]+/g, '')}(){}`)();
-        Object.setPrototypeOf(value, new Fn());
-      }
-      // eslint-disable-next-line no-param-reassign
-      delete value['_constructor-name_'];
-      return value;
-    }
-
-    if (typeof value === 'string' && value.startsWith('_function_') && options.allowFunction) {
-      const [, name, source] = value.match(/_function_([^|]*)\|(.*)/) || [];
-      // eslint-disable-next-line no-useless-escape
-      const sourceSanitized = source.replace(/[(\(\))|\\| |\]|`]*$/, '');
-
-      if (!options.lazyEval) {
-        // eslint-disable-next-line no-eval
-        return eval(`(${sourceSanitized})`);
-      }
-
-      // lazy eval of the function
-      const result = (...args: any[]) => {
-        // eslint-disable-next-line no-eval
-        const f = eval(`(${sourceSanitized})`);
-        return f(...args);
-      };
-      Object.defineProperty(result, 'toString', {
-        value: () => sourceSanitized,
-      });
-      Object.defineProperty(result, 'name', {
-        value: name,
-      });
-      return result;
     }
 
     if (typeof value === 'string' && value.startsWith('_regexp_') && options.allowRegExp) {
@@ -427,15 +301,15 @@ export const reviver = function reviver(options: Options): any {
     }
 
     if (typeof value === 'string' && value === '_-Infinity_') {
-      return -Infinity;
+      return Number.NEGATIVE_INFINITY;
     }
 
     if (typeof value === 'string' && value === '_Infinity_') {
-      return Infinity;
+      return Number.POSITIVE_INFINITY;
     }
 
     if (typeof value === 'string' && value === '_NaN_') {
-      return NaN;
+      return Number.NaN;
     }
 
     if (typeof value === 'string' && value.startsWith('_bigint_') && typeof BigInt === 'function') {
@@ -449,14 +323,11 @@ export const reviver = function reviver(options: Options): any {
 const defaultOptions: Options = {
   maxDepth: 10,
   space: undefined,
-  allowFunction: true,
   allowRegExp: true,
   allowDate: true,
-  allowClass: true,
   allowError: true,
   allowUndefined: true,
   allowSymbol: true,
-  lazyEval: true,
 };
 
 export const stringify = (data: unknown, options: Partial<Options> = {}) => {
@@ -471,9 +342,9 @@ const mutator = () => {
     // JSON.parse will not output keys with value of undefined
     // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
     if (isObject<{ [keys: string]: any }>(value)) {
+      // biome-ignore lint/complexity/noForEach: <explanation>
       Object.entries(value).forEach(([k, v]) => {
         if (v === '_undefined_') {
-          // eslint-disable-next-line no-param-reassign
           value[k] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);
@@ -485,7 +356,7 @@ const mutator = () => {
       value.forEach((v, index) => {
         if (v === '_undefined_') {
           mutated.set(v, true);
-          // eslint-disable-next-line no-param-reassign
+
           value[index] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);

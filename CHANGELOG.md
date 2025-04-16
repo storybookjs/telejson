@@ -1,3 +1,11 @@
+# 8.0.0 (to be released)
+
+#### Dropped support
+
+- Removed support for stringify-ing functions and methods
+- Removed support for class instances, and convert them to plain objects
+- Removed the options related to functions & classes: `allowFunctions`, `allowClass` and `lazyEval`
+
 # v7.2.0 (Mon Aug 21 2023)
 
 #### 🚀 Enhancement
