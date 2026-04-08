@@ -1,4 +1,6 @@
-# v8.0.0 (Wed Apr 16 2025)
+# telejson
+
+## v8.0.0 (Wed Apr 16 2025)
 
 #### 💥 Breaking Change
 
@@ -10,7 +12,7 @@
 
 ---
 
-# 8.0.0 (to be released)
+## 8.0.0 (to be released)
 
 #### Dropped support
 
@@ -18,7 +20,7 @@
 - Removed support for class instances, and convert them to plain objects
 - Removed the options related to functions & classes: `allowFunctions`, `allowClass` and `lazyEval`
 
-# v7.2.0 (Mon Aug 21 2023)
+## v7.2.0 (Mon Aug 21 2023)
 
 #### 🚀 Enhancement
 
