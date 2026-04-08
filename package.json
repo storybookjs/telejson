@@ -2,15 +2,7 @@
   "name": "telejson",
   "version": "8.0.0",
   "description": "",
-  "keywords": [
-    "JSON",
-    "cyclic",
-    "cyclical",
-    "date",
-    "parse",
-    "regex",
-    "stringify"
-  ],
+  "keywords": ["JSON", "cyclic", "cyclical", "date", "parse", "regex", "stringify"],
   "homepage": "https://github.com/storybookjs/telejson",
   "bugs": {
     "url": "https://github.com/storybookjs/telejson/issues"
@@ -24,12 +16,7 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "*.js",
-    "*.d.ts"
-  ],
+  "files": ["dist/**/*", "README.md", "*.js", "*.d.ts"],
   "scripts": {
     "build": "tsup",
     "lint": "biome lint .",
@@ -39,15 +26,14 @@
     "test": "TZ=UTC vitest run",
     "test:watch": "TZ=UTC vitest",
     "test:coverage": "TZ=UTC vitest run --coverage",
-    "release": "pnpm run build && auto shipit"
+    "release": "pnpm changeset publish",
+    "changeset": "changeset"
   },
   "devDependencies": {
-    "@auto-it/released": "^11.0.1",
     "@biomejs/biome": "^1.9.4",
     "@types/is-function": "^1.0.0",
     "@types/lodash-es": "^4.17.6",
     "@vitest/coverage-v8": "^1.3.1",
-    "auto": "^11.0.1",
     "common-tags": "^1.8.0",
     "happy-dom": "^13.1.0",
     "is-function": "^1.0.2",
@@ -57,16 +43,14 @@
     "lodash-es": "^4.17.21",
     "tsup": "^6.2.2",
     "typescript": "^4.2.3",
-    "vitest": "^1.3.1"
+    "vitest": "^1.3.1",
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.6",
+    "pkg-pr-new": "^0.0.57"
   },
   "publishConfig": {
-    "access": "public"
-  },
-  "auto": {
-    "plugins": [
-      "npm",
-      "released"
-    ]
+    "access": "public",
+    "provenance": true
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
 }
