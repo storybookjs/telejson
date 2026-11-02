@@ -7,7 +7,14 @@ import { extractEventHiddenProperties } from './dom-event';
 
 const isObject = isObjectAny as <T = object>(val: any) => val is T;
 
-const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+// A plain string that starts like one of our tags is prefixed with `_string_`, so the reviver
+// gives it back as the same string instead of reviving it into another type.
+const taggedString = /^_(?:undefined|NaN|-?Infinity|bigint|date|regexp|g?symbol|duplicate|string)_/;
+const escapedStringPrefix = '_string_';
+
+// JSON.parse drops keys whose reviver returns undefined, so the reviver returns this marker
+// and `mutator` swaps it for undefined afterwards.
+const undefinedMarker = Symbol('telejson.undefined');
 
 export interface Options {
   allowRegExp: boolean;
@@ -115,11 +122,16 @@ export const replacer = function replacer(options: Options): any {
       }
 
       if (typeof value === 'string') {
-        if (dateFormat.test(value)) {
+        // Date#toJSON already ran, so look at the original value to tell a Date from a string.
+        if (this[key] instanceof Date) {
           if (!options.allowDate) {
             return undefined;
           }
           return `_date_${value}`;
+        }
+
+        if (taggedString.test(value)) {
+          return `${escapedStringPrefix}${value}`;
         }
 
         return value;
@@ -268,6 +280,14 @@ export const reviver = function reviver(options: Options): any {
       return value;
     }
 
+    if (typeof value === 'string' && value.startsWith(escapedStringPrefix)) {
+      return value.slice(escapedStringPrefix.length);
+    }
+
+    if (typeof value === 'string' && value === '_undefined_') {
+      return undefinedMarker;
+    }
+
     if (isObject<ValueContainer>(value) && value.__isConvertedError__) {
       // reconstruct the error with its original properties
       const { message, ...properties } = value.errorProperties;
@@ -340,11 +360,11 @@ const mutator = () => {
 
   return function mutateUndefined(value: any) {
     // JSON.parse will not output keys with value of undefined
-    // we map over a deeply nester object, if we find any value with `_undefined_`, we mutate it to be undefined
+    // we map over a deeply nester object, if we find any value with `undefinedMarker`, we mutate it to be undefined
     if (isObject<{ [keys: string]: any }>(value)) {
       // biome-ignore lint/complexity/noForEach: <explanation>
       Object.entries(value).forEach(([k, v]) => {
-        if (v === '_undefined_') {
+        if (v === undefinedMarker) {
           value[k] = undefined;
         } else if (!mutated.get(v)) {
           mutated.set(v, true);
@@ -354,7 +374,7 @@ const mutator = () => {
     }
     if (Array.isArray(value)) {
       value.forEach((v, index) => {
-        if (v === '_undefined_') {
+        if (v === undefinedMarker) {
           mutated.set(v, true);
 
           value[index] = undefined;
@@ -370,6 +390,10 @@ const mutator = () => {
 export const parse = (data: string, options: Partial<Options> = {}) => {
   const mergedOptions: Options = { ...defaultOptions, ...options };
   const result = JSON.parse(data, reviver(mergedOptions));
+
+  if (result === undefinedMarker) {
+    return undefined;
+  }
 
   mutator()(result);
 
