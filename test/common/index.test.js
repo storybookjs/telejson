@@ -429,6 +429,60 @@ const tests = ({ stringify, parse }) => {
 
     expect(stringified).toMatchInlineSnapshot(`"{"instance":{"__isClassInstance__":true,"__className__":"Thing","token":"_duplicate_[\\"instance\\"]"}}"`);
   });
+
+  it('strings that look like a tag round-trip as the same string', () => {
+    const strings = [
+      '_undefined_',
+      '_NaN_',
+      '_Infinity_',
+      '_-Infinity_',
+      '_bigint_5',
+      '_date_2019-01-01T00:00:00.000Z',
+      '_regexp_g|test',
+      '_symbol_apple',
+      '_gsymbol_apple',
+      '_duplicate_[]',
+      '_string_apple',
+      '_string__date_2019-01-01T00:00:00.000Z',
+    ];
+    const data = { strings, nested: { strings } };
+
+    const parsed = parse(stringify(data));
+
+    expect(parsed.strings).toEqual(strings);
+    expect(parsed.nested.strings).toEqual(strings);
+  });
+
+  it('a string in ISO date format stays a string', () => {
+    const data = { isoString: '2019-01-01T00:00:00.000Z', date: new Date('2019-01-01T00:00:00.000Z') };
+
+    const parsed = parse(stringify(data));
+
+    expect(parsed.isoString).toBe('2019-01-01T00:00:00.000Z');
+    expect(parsed.date).toBeInstanceOf(Date);
+  });
+
+  it('allowDate: false drops Dates but keeps ISO strings', () => {
+    const data = { isoString: '2019-01-01T00:00:00.000Z', date: new Date('2019-01-01T00:00:00.000Z') };
+
+    const stringified = stringify(data, { allowDate: false });
+
+    expect(stringified).toEqual('{"isoString":"2019-01-01T00:00:00.000Z"}');
+  });
+
+  it('a string that looks like a tag on a class instance round-trips as the same string', () => {
+    class Thing {
+      constructor() {
+        this.label = '_duplicate_[]';
+        this.when = new Date('2019-01-01T00:00:00.000Z');
+      }
+    }
+
+    const parsed = parse(stringify({ thing: new Thing() }));
+
+    expect(parsed.thing.label).toBe('_duplicate_[]');
+    expect(parsed.thing.when).toBeInstanceOf(Date);
+  });
 };
 
 describe('Dist', () => {
